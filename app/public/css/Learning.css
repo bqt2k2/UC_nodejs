@@ -1,0 +1,688 @@
+body {
+    display: flex;
+    flex-direction: column;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #2c3e50;
+    color: white;
+    padding: 10px 20px;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
+.logo {
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
+    border-radius: 50%;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+}
+
+.header-left h1 {
+    margin: 0;
+    font-size: 24px;
+    margin-right: 10px;
+}
+
+.search-bar {
+    padding: 8px;
+    border-radius: 5px;
+    border: none;
+    margin-right: 10px;
+    width: 20%;
+}
+
+#search-results {
+    position: absolute;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 35%;
+    max-height: 300px;
+    overflow-y: auto;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 999;
+    display: none;
+    padding: 10px;
+    box-sizing: border-box;
+    color: black;
+}
+
+.search-bar:focus + #search-results {
+    display: block;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+}
+
+.header-right .btn {
+    padding: 10px 20px;
+    background-color: #e67e22;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 25px;
+}
+
+.header-right .logout {
+    background-color: #e74c3c;
+    margin-right: 25px;
+}
+
+.container {
+    display: flex;
+    width: 100%;
+    height: calc(100vh - 60px);
+    padding-top: 60px;
+    position: relative;
+}
+
+.sidebar {
+    width: 250px;
+    background-color: #f4f4f4;
+    padding: 20px;
+    border-right: 1px solid #ccc;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: width 0.3s ease;
+    z-index: 1;
+}
+
+.sidebar.collapsed {
+    width: 60px;
+}
+
+.sidebar.collapsed h2,
+.sidebar.collapsed ul li a,
+.sidebar.collapsed .navigation-buttons {
+    display: none;
+}
+
+.sidebar h2 {
+    margin: 0 10px;
+    font-size: 1.5em;
+    color: #333;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 10px;
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex: 1;
+}
+
+.sidebar ul li {
+    margin: 10px 0;
+}
+
+.sidebar ul li.active {
+    background-color: #ddd;
+    border-radius: 5px;
+}
+
+.sidebar ul li a {
+    text-decoration: none;
+    color: #333;
+    display: block;
+    padding: 10px;
+    transition: background-color 0.3s;
+}
+
+.sidebar ul li a:hover {
+    background-color: #eee;
+    border-radius: 5px;
+}
+
+.main-content {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.main-content h1 {
+    margin-top: 0;
+    font-size: 2em;
+    color: #333;
+}
+
+.main-content p {
+    color: #666;
+}
+
+.lessonText {
+    width: 96%;
+    height: 93%;
+    overflow-y: auto;
+    border: 1px solid rgb(204, 204, 204);
+    border-radius: 5px;
+    padding: 27px;
+    font-size: 1.1em;
+    line-height: 1.6;
+    display: block;
+}
+
+video, iframe {
+    width: 100%;
+    height: 88%;
+    display: none;
+    border: 2px solid #b9b7b7;
+    border-radius: 20px;
+    margin-top: 20px;
+}
+
+video {
+    display: block;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
+}
+
+.logo-text {
+    margin-right: 15px;
+}
+
+.navigation-buttons {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.navigation-buttons button {
+    padding: 10px 15px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 48%;
+}
+
+.navigation-buttons button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.disabled {
+    pointer-events: none;
+    color: gray;
+}
+
+.sidebar-toggle {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    .sidebar-header {
+        flex-direction: row;
+        justify-content: start;
+        width: 100%;
+    }
+    .header-right {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .container {
+        flex-direction: column;
+        padding-top: 120px;
+    }
+
+    .sidebar {
+        width: 99%;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 1px solid #ccc;
+    }
+
+    .sidebar ul li a {
+        padding: 10px;
+    }
+
+    .main-content {
+        padding: 10px;
+    }
+
+    video, iframe {
+        height: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-right {
+        align-items: center;
+    }
+}
+
+.in-progress {
+    color: blue;
+    cursor: pointer;
+}
+
+#lessonText {
+    white-space: pre-wrap;
+    font-family: 'Arial', sans-serif;
+}
+
+/* Review Feature Styles */
+
+#reviewPopup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    z-index: 1001;
+    width: 90%;
+    max-width: 600px;
+    max-height: 80%;
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+#reviewPopup h3 {
+    margin-top: 0;
+}
+
+#reviewPopup textarea {
+    width: 100%;
+    height: 80px;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-family: Arial, sans-serif;
+}
+
+#reviewPopup input[type="number"] {
+    width: 100px;
+    margin-bottom: 10px;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.review-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.review-buttons .btn {
+    flex: 1;
+    margin: 0 5px;
+    padding: 10px 20px;
+    background-color: #2c22e6;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 25px;
+}
+
+#otherReviews {
+    margin-top: 20px;
+}
+
+#otherReviews .review {
+    border-top: 1px solid #ddd;
+    padding-top: 10px;
+    margin-top: 10px;
+}
+
+#userSubmittedReview {
+    margin-top: 20px;
+    border-top: 1px solid #ddd;
+    padding-top: 10px;
+}
+
+.review {
+    background-color: #f4f4f4;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: block;
+    align-items: center;
+}
+
+.review-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+#reviewPopup {
+    position: fixed;
+    top: 25%;
+    left: 72%;
+    transform: translate(-50%, -20%);
+    padding: 20px;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    max-width: 90%;
+    width: 400px;
+    height: 600px;
+    overflow-y: auto;
+    z-index: 1001;
+    display: none;
+}
+
+#yourReview {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    background-color: white;
+    padding-bottom: 10px;
+}
+#userSubmittedReview,
+.review p {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+#userSubmittedReview {
+    display: block;
+    width: 100%; /* Ensure the container takes the full width */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+#userSubmittedReview p {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+#userCommentDisplay {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+#yourReview textarea,
+#yourReview input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: pre-wrap; /* ensures that text wraps and preserves white spaces */
+}
+
+.review-buttons {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.review-buttons .btn {
+    width: 48%;
+}
+/* ghi chú */
+#notePopup {
+    position: fixed;
+    top: 54%;
+    left: 77%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    max-width: 90%;
+    width: 400px;
+    height: 600px;
+    overflow-y: auto;
+    z-index: 1001;
+    display: none;
+}
+
+#noteInput {
+    width: 100%;
+    height: 100px;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+#saveNoteButton {
+    align-self: flex-end;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#saveNoteButton:hover {
+    background-color: #0056b3;
+}
+
+#userSubmittedNote {
+    margin-top: 20px;
+}
+
+#userNoteDisplay {
+    white-space: pre-wrap;
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        width: 60px;
+    }
+
+    .sidebar h2 {
+        display: none;
+    }
+
+    .sidebar ul li a {
+        padding: 10px 5px;
+        text-align: center;
+        font-size: 12px;
+    }
+
+    .sidebar ul li.active {
+        background-color: transparent;
+    }
+
+    .sidebar-toggle {
+        display: block;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 24px;
+    }
+
+    .main-content {
+        margin-left: 60px;
+        padding: 10px;
+    }
+
+    #reviewPopup {
+        width: 90%;
+        height: auto;
+        max-height: 80vh;
+    }
+
+    .review-buttons {
+        flex-direction: column;
+    }
+
+    .review-buttons .btn {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+}
+/* gợi ý khóa học */
+.course-suggestions {
+    margin-top: 20px;
+}
+
+.course-suggestions h2 {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+#suggestionsList {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* Số cột trong grid là 3 */
+    gap: 20px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.course {
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.3s;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.course:hover {
+    transform: scale(1.05);
+}
+
+.course img {
+    width: 100%;
+    height: 280px;
+    object-fit: cover;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.course-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.course-info h3 {
+    margin: 10px 0;
+    font-size: 18px; /* Kích thước chữ cho tên khóa học */
+    font-weight: bold;
+}
+
+.course-info a {
+    text-decoration: none;
+    color: #333;
+}
+
+.course-info a:hover {
+    color: #007bff;
+}
+/* hiển thị chat  */
+#chatIcon {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    border-radius: 50%;
+    background-color: #007bff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000; /* Ensure it appears above other elements */
+}
+
+#chatForm {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 300px;
+    background: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    z-index: 1000; /* Ensure it appears above other elements */
+}
+
+#chatHeader {
+    background: #007bff;
+    color: white;
+    padding: 10px;
+    text-align: center;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+#chatMessages {
+    height: 200px;
+    overflow-y: scroll;
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+#chatInput {
+    width: calc(100% - 60px);
+    padding: 10px;
+    border: none;
+    border-top: 1px solid #ccc;
+    border-bottom-left-radius: 10px;
+    outline: none;
+}
+
+#btnsend {
+    width: 60px;
+    background: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    outline: none;
+}
+

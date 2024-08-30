@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Chỉnh Sửa Khóa Học</title>
+    <link rel="stylesheet" href="/css/course.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-beta.1/css/select2.min.css" />
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="icon" href="/img/logo.png" sizes="16x16" type="image/png">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <img src="/img/logo.png" alt="" class="logo">
+            <h1>U.COURSE</h1>
+        </div>
+        <div class="header-right">
+            <button class="btn" onclick="window.location.href='/profile'">Thông tin</button>
+            <div class="user-info">
+                <span class="logo-text">Hi! <%= user.HoTenNguoiDung %></span>
+                <form action="/logout" method="post" style="display: inline;">
+                    <button class="btn logout" type="submit">Đăng xuất</button>
+                </form>
+            </div>
+        </div>
+    </header>
+    <div class="container">
+        <h1>Chỉnh Sửa Khóa Học</h1>
+        <% if (typeof message !== 'undefined' && message) { %>
+            <div class="alert alert-success"><%= message %></div>
+        <% } %>
+        <form action="/courses/<%= course.IDKhoaHoc %>?_method=PUT" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="_method" value="PUT">
+            <label for="TenKhoaHoc">Tên khóa học:</label>
+            <input type="text" id="TenKhoaHoc" name="TenKhoaHoc" value="<%= course.TenKhoaHoc %>" required>
+            <br>
+            <label for="MoTaKhoaHoc">Mô tả:</label>
+            <textarea id="MoTaKhoaHoc" name="MoTaKhoaHoc"><%= course.MoTaKhoaHoc %></textarea>
+            <br>
+            <label for="IDDanhMuc">Danh mục:</label>
+            <select id="IDDanhMuc" name="IDDanhMuc" required>
+                <% categories.forEach(category => { %>
+                    <option value="<%= category.IDDanhMuc %>" <%= course.IDDanhMuc === category.IDDanhMuc ? 'selected' : '' %>><%= category.TenDanhMuc %></option>
+                <% }) %>
+            </select>
+            <br>
+            <img src="<%= course.AnhKhoaHoc %>" alt="Course Image" class="img-course" id="img-course">
+            <label for="AnhKhoaHoc">Ảnh của khóa học:</label>
+            <input type="file" id="AnhKhoaHoc" name="AnhKhoaHoc">
+            <br>
+            <label for="Tags">Tags:</label>
+            <select name="Tags[]" id="Tags" multiple="multiple" style="width: 100%;" required></select>
+            <br>
+            <button type="submit" class="btn">Cập Nhật</button>
+        </form>
+        <h2>Danh Sách Bài Học</h2>
+        <table class="lesson-table">
+            <thead>
+                <tr>
+                    <th>Tên Bài Học</th>
+                    <th>Loại Bài Học</th>
+                    <th>Thứ tự bài học</th>
+                    <th>Hành Động</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (lessons.length > 0) { %>
+                    <% lessons.forEach(function(item) { %>
+                        <tr id="lesson-<%= item.IDBaiHoc %>">
+                            <td><%= item.TenBaiHoc %></td>
+                            <td><%= item.LoaiBaiHoc %></td>
+                            <td><%= item.ThuTuBaiHoc %></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button type="button" class="btn btn-delete" onclick="deleteLesson('<%= item.IDBaiHoc %>', '<%= course.IDKhoaHoc %>')">Xóa</button>
+                                    <button type="button" class="btn btn-edit" onclick="window.location.href='/lessons/<%= item.IDBaiHoc %>/edit'">Sửa</button>
+                                </div>
+                            </td>                                
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="4">Không có bài học nào.</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+        <a href="/lessons/upload?courseId=<%= course.IDKhoaHoc %>" class="btncontain btn-add">Thêm Bài Học Mới</a>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-beta.1/js/select2.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        $('#Tags').select2({
+            placeholder: 'Enter tags',
+            minimumInputLength: 2,
+            ajax: {
+                url: '/tags',
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {
+                        q: params.term
+                    };
+                },
+                processResults: function (data) {
+                    return {
+                        results: data.map(function(tag) {
+                            return {
+                                id: tag.id,
+                                text: tag.name
+                            };
+                        })
+                    };
+                },
+                cache: true
+            }
+        });
+            // Pre-populate existing tags
+            const existingTags = <%- JSON.stringify(courseTags) %>;
+            existingTags.forEach(tag => {
+                const option = new Option(tag.TenTag, tag.IDTag, true, true);
+                $('#Tags').append(option).trigger('change');
+            });
+
+        const avatarInput = document.getElementById('AnhKhoaHoc');
+        const profileAvatar = document.getElementById('img-course');
+
+        avatarInput.addEventListener('change', function () {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    profileAvatar.src = e.target.result;
+                };
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+        });
+        function deleteLesson(lessonId, courseId) {
+    Swal.fire({
+        title: 'Bạn có chắc chắn?',
+        text: 'Bạn có chắc chắn muốn xóa bài học này không?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Có, xóa nó!',
+        cancelButtonText: 'Hủy'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: '/lessons/' + lessonId,
+                type: 'DELETE',
+                data: { courseId: courseId },
+                success: function(response) {
+                    $('#lesson-' + lessonId).remove();
+                    Swal.fire(
+                        'Đã xóa!',
+                        response.message,
+                        'success'
+                    );
+                },
+                error: function(xhr) {
+                    Swal.fire(
+                        'Thất bại!',
+                        'Không thể xóa bài học. Vui lòng thử lại.',
+                        'error'
+                    );
+                }
+            });
+        }
+    });
+}
+        function showAlert(message, type) {
+            var alertBox = document.createElement('div');
+            alertBox.className = 'alert ' + type;
+            alertBox.innerText = message;
+            document.body.appendChild(alertBox);
+            setTimeout(function() {
+                alertBox.remove();
+            }, 3000);
+        }
+    
+    </script>
+</body>
+</html>

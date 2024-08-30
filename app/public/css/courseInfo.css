@@ -1,0 +1,292 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    width: 80%;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    margin-top: 100px; /* To offset fixed header */
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #2c3e50;
+    color: white;
+    padding: 10px 20px;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
+.logo {
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
+    border-radius: 50%;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+}
+
+.header-left h1 {
+    margin: 0;
+    font-size: 24px;
+    margin-right: 10px;
+}
+
+.search-bar {
+    padding: 8px;
+    border-radius: 5px;
+    border: none;
+    margin-right: 10px;
+    width: 20%;
+}
+
+#search-results {
+    position: absolute;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 35%;
+    max-height: 300px;
+    overflow-y: auto;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 999;
+    display: none;
+    padding: 10px;
+    box-sizing: border-box;
+    color: black;
+}
+
+.search-bar:focus + #search-results {
+    display: block;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+}
+
+.header-right .btn {
+    padding: 10px 20px;
+    background-color: #e67e22;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 25px;
+}
+
+.header-right .logout {
+    background-color: #e74c3c;
+    margin-right: 25px;
+}
+
+.header-container {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.header-container h1 {
+    margin: 10px 0;
+    font-size: 2.5em;
+    color: #333;
+}
+
+.header-container p {
+    font-size: 1.2em;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.download-button {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 10px 20px;
+    color: #fff;
+    background-color: #ff9800;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.download-button:hover {
+    background-color: #e68900;
+}
+
+.rating {
+    font-size: 1.2em;
+    color: #ff9800;
+    margin-top: 10px;
+}
+
+.lessons {
+    margin: 20px 0;
+}
+
+.lessons h2 {
+    font-size: 2em;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.lessons ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.lessons li {
+    background-color: #f9f9f9;
+    margin-bottom: 10px;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.lessons li h3 {
+    margin: 0 0 5px 0;
+    color: #333;
+}
+
+.lessons li p {
+    margin: 0 0 10px 0;
+    color: #666;
+}
+
+.lessons li a {
+    display: inline-block;
+    padding: 10px 15px;
+    color: #fff;
+    background-color: #007bff;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.lessons li a:hover {
+    background-color: #0056b3;
+}
+
+.reviews {
+    margin: 20px 0;
+}
+
+.reviews h2 {
+    font-size: 2em;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.reviews ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.reviews li {
+    background-color: #f9f9f9;
+    margin-bottom: 10px;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.reviews li strong {
+    display: block;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.reviews li p {
+    margin: 0;
+    color: #666;
+    word-wrap: break-word;
+
+}
+
+.reviews li span {
+    display: block;
+    margin-top: 5px;
+    color: #888;
+}
+
+.actions {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.actions form button {
+    padding: 10px 20px;
+    font-size: 1em;
+    color: #fff;
+    background-color: #28a745;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.actions form button:hover {
+    background-color: #218838;
+}
+
+.rating {
+    color: #666;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.rating:hover {
+    color: #ff9800;
+}
+
+.register-button {
+    padding: 10px 20px;
+    font-size: 1em;
+    color: #fff;
+    background-color: #28a745;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin-top: 20px;
+    transition: position 0.3s, right 0.3s, bottom 0.3s;
+}
+
+.register-button:hover {
+    background-color: #218838;
+}
+
+.fixed-register-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+}
+/* thong báo */
+.custom-button {
+    background-color: #007BFF !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 5px !important;
+    padding: 10px 20px !important;
+    font-size: 16px !important;
+    cursor: pointer !important;
+}
+
+.custom-button:hover {
+    background-color: #0056b3 !important;
+}

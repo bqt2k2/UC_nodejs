@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Course</title>
+    <link rel="stylesheet" href="/css/course.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-beta.1/css/select2.min.css" />
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="icon" href="/img/logo.png" sizes="16x16" type="image/png">
+</head>
+<body>
+    <header>
+        <div class="header-left" onclick="window.location.href='/home'">
+            <img src="/img/logo.png" alt="" class="logo">
+            <h1>U.COURSE</h1>
+        </div>
+        <div id="search-results"></div>
+        <div class="header-right">
+            <% if (user) { %>
+                <button class="btn" onclick="window.location.href='/profile'">Thông tin </button>
+                <div class="user-info">
+                    <span class="logo-text">Chào! <%= user.HoTenNguoiDung %></span>
+                    <form action="/logout" method="post" style="display: inline;">
+                        <button class="btn logout" type="submit">Đăng xuất</button>
+                    </form>
+                </div>
+            <% } else { %>
+                <button class="btn" onclick="window.location.href='/login'">Đăng nhập</button>
+            <% } %>
+        </div>
+    </header>
+    <div class="container">
+    <form action="/createcourse" method="post" enctype="multipart/form-data">
+        <h1>Đăng tải khóa học</h1>
+        <label for="TenKhoaHoc">Tên khóa học:</label>
+        <input type="text" name="TenKhoaHoc" id="TenKhoaHoc" required>
+        <br>
+        <label for="MoTaKhoaHoc">Mô tả:</label>
+        <textarea name="MoTaKhoaHoc" id="MoTaKhoaHoc"></textarea>
+        <br>
+        <img src="../img/logo.png" alt="Course Picture" class="img-course" id="img-course" />
+        <label for="AnhKhoaHoc">Ảnh khóa học:</label>
+        <input type="file" name="AnhKhoaHoc" id="AnhKhoaHoc" value="seclect img"> 
+        <label for="IDDanhMuc">Danh mục:</label>
+        <select name="IDDanhMuc" id="IDDanhMuc" required>
+            <% categories.forEach(category => { %>
+                <option value="<%= category.IDDanhMuc %>"><%= category.TenDanhMuc %></option>
+            <% }) %>
+        </select>        
+        <br>
+        <label for="Tags">Thẻ:</label>
+        <select name="Tags[]" id="Tags" multiple="multiple" style="width: 100%;" required></select>
+        <br>
+        <input type="hidden" name="IDNguoiTao" id="IDNguoiTao" value="<%= user.IDNguoiDung%>">
+        <button type="submit">Đăng khóa học</button>
+    </form>
+</div>
+</body>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-beta.1/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#Tags').select2({
+            placeholder: 'Enter tags',
+            minimumInputLength: 2,
+            ajax: {
+                url: '/tags',
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {
+                        q: params.term
+                    };
+                },
+                processResults: function (data) {
+                    return {
+                        results: data.map(function(tag) {
+                            return {
+                                id: tag.id,
+                                text: tag.name
+                            };
+                        })
+                    };
+                },
+                cache: true
+            }
+        });
+
+        const avatarInput = document.getElementById('AnhKhoaHoc');
+        const profileAvatar = document.getElementById('img-course');
+
+        avatarInput.addEventListener('change', function () {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    profileAvatar.src = e.target.result;
+                };
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+    });
+</script>
+</html>

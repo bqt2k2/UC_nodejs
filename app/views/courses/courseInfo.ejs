@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= course.TenKhoaHoc %>
+    </title>
+    <link rel="stylesheet" href="/css/courseInfo.css">
+    <link rel="icon" href="/img/logo.png" sizes="16x16" type="image/png">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body>
+    <header>
+        <div class="header-left" onclick="window.location.href='/home'">
+            <img src="/img/logo.png" alt="" class="logo">
+            <h1>U.COURSE</h1>
+        </div>
+        <div id="search-results"></div>
+        <div class="header-right">
+            <% if (user) { %>
+                <button class="btn" onclick="window.location.href='/profile'">Thông tin</button>
+                <div class="user-info">
+                    <span class="logo-text">Chào! <%= user.HoTenNguoiDung %></span>
+                    <form action="/logout" method="post" style="display: inline;">
+                        <button class="btn logout" type="submit">Đăng xuất</button>
+                    </form>
+                </div>
+                <% } else { %>
+                    <button class="btn" onclick="window.location.href='/login'">Đăng nhập</button>
+                    <% } %>
+        </div>
+    </header>
+    <div class="container">
+        <section class="header-container">
+            <h1>
+                <%= course.TenKhoaHoc %>
+            </h1>
+            <p>
+                <%= course.MoTaKhoaHoc %>
+            </p>
+            <% if (course.SoLuongDanhGia> 0) { %>
+                <p class="rating" id="rating">⭐ <%= course.DiemTrungBinh %> (<%= course.SoLuongDanhGia %> ratings)</p>
+                <% } else { %>
+                    <p class="rating" id="rating">Chưa có đánh giá</p>
+                    <% } %>
+                        <% if (registered) { %>
+                            <button class="register-button" id="registerButton" onclick="continueLearning()">Tiếp tục học</button>
+                            <% } else { %>
+                                <button class="register-button" id="registerButton"
+                                    onclick="registerForCourse()">Đăng kí khóa học</button>
+                                <% } %>
+        </section>
+
+        <section class="lessons">
+            <h2>Danh sách bài học</h2>
+            <ul>
+                <% lessons.forEach(lesson=> { %>
+                    <li>
+                        <h3>
+                            <%= lesson.TenBaiHoc %>
+                        </h3>
+                        <p>
+                            <%= lesson.MoTa %>
+                        </p>
+                        <!-- <a href="/lessons/<%= lesson.IDBaiHoc %>.pdf" download>Download</a> -->
+                    </li>
+                    <% }) %>
+            </ul>
+        </section>
+
+        <section class="reviews" id="reviews">
+            <h2>Đánh giá khóa học</h2>
+            <% if (reviews.length> 0) { %>
+                <ul>
+                    <% reviews.forEach(review=> { %>
+                        <li>
+                            <strong>
+                                <%= review.HoTenNguoiDung %>:
+                            </strong>
+                            <p>
+                                <%= review.BinhLuan %>
+                            </p>
+                            <span>Rating: <%= review.DiemDanhGia %>/5</span>
+                        </li>
+                        <% }) %>
+                </ul>
+                <% } else { %>
+                    <p>Chưa có đánh giá.</p>
+                    <% } %>
+        </section>
+    </div>
+    <script>
+const registerButton = document.getElementById('registerButton');
+const ratingSection = document.getElementById('rating');
+
+// Hàm cuộn mượt đến phần đánh giá
+document.querySelector('.rating').addEventListener('click', function () {
+    document.getElementById('reviews').scrollIntoView({ behavior: 'smooth' });
+});
+
+// Hàm xử lý cuộn trang
+function handleScroll() {
+    const rect = ratingSection.getBoundingClientRect();
+    const registerButtonVisible = registerButton.classList.contains('fixed-register-button');
+
+    // Kiểm tra xem ratingSection có nằm trong cửa sổ trình duyệt hay không
+    if (rect.bottom < window.innerHeight && !registerButtonVisible) {
+        registerButton.classList.add('fixed-register-button');
+    } else if (rect.bottom >= window.innerHeight && registerButtonVisible) {
+        registerButton.classList.remove('fixed-register-button');
+    }
+}
+
+// Sử dụng debounce để giảm tần suất gọi hàm
+function debounce(func, wait) {
+    let timeout;
+    return function (...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+}
+
+// Thực thi hàm cuộn mượt với debounce
+window.addEventListener('scroll', debounce(handleScroll, 100));
+
+// Gọi hàm này để đảm bảo nút có trạng thái đúng khi tải trang
+function updateButtonState() {
+    const rect = ratingSection.getBoundingClientRect();
+    if (rect.bottom < window.innerHeight) {
+        registerButton.classList.add('fixed-register-button');
+    } else {
+        registerButton.classList.remove('fixed-register-button');
+    }
+}
+
+// Gọi hàm kiểm tra trạng thái khi tải trang
+window.addEventListener('load', updateButtonState);
+
+        // Register for course
+        function registerForCourse() {
+    if (!<%= user ? 'true' : 'false' %>) {
+        showConfirm('Bạn chưa đăng nhập. Bạn muốn đăng nhập ?', function() {
+            window.location.href = '/login';
+        });
+        return;
+    }
+    window.location.href = '/registerCourse/<%= course.IDKhoaHoc %>';
+}
+
+function showConfirm(message, onYes) {
+    Swal.fire({
+        title: 'Xác nhận',
+        text: message,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Đăng nhập',
+        cancelButtonText: 'Hủy bỏ',
+        customClass: {
+            confirmButton: 'custom-button',
+            cancelButton: 'custom-button'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            onYes();
+        }
+    });
+}
+
+        // Continue learning
+        function continueLearning() {
+            window.location.href = '/learning/<%= course.IDKhoaHoc %>';
+        }
+    </script>
+</body>
+
+</html>

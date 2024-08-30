@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>U.COURSE</title>
+    <link rel="stylesheet" href="/css/home.css">
+    <link rel="icon" href="/img/logo.png" sizes="16x16" type="image/png">
+</head>
+<body>
+    <header>
+        <div class="header-left" onclick="window.location.href='/home'">
+            <img src="/img/logo.png" alt="" class="logo">
+            <h1>U.COURSE</h1>
+        </div>
+        <input type="text" placeholder="Search Courses" class="search-bar" oninput="searchCourses(this.value)">
+        <div id="search-results" style="display: none;"></div>
+        <div class="header-right">
+            <% if (user) { %>
+                <button class="btn" onclick="window.location.href='/profile'">Thông tin</button>
+                <div class="user-info">
+                    <span class="logo-text">Hi! <%= user.HoTenNguoiDung %></span>
+                    <form action="/logout" method="post" style="display: inline;">
+                        <button class="btn logout" type="submit">Đăng xuất</button>
+                    </form>
+                </div>
+            <% } else { %>
+                <button class="btn" onclick="window.location.href='/register'">Đăng kí</button>
+                <button class="btn" onclick="window.location.href='/login'">Đăng nhập</button>
+            <% } %>
+        </div>
+    </header>
+    <main>
+        <div class="container">
+            <div class="dashboard">
+                <h3 onclick="toggleCategories()">Danh Mục</h3>
+                <ul id="categories" class="active">
+                    <% categories.forEach(category => { %>
+                        <li><a href="#" onclick="filterCoursesByCategory('<%= category.IDDanhMuc %>')"><%= category.TenDanhMuc %></a></li>
+                    <% }) %>
+                </ul>
+            </div>
+            <div class="profile-content">
+                <div class="banner">
+                    <h1>Best place to learn new things</h1>
+                    <h1>Take Charge of Your Learning and Growth</h1>
+                    <h1>Fuel Your Passion for Knowledge</h1>
+                </div>
+                <div class="welcome">
+                    <h2>Chào <%= user ? user.HoTenNguoiDung : 'Guest' %>!</h2>
+                </div>
+                <div class="top-weekly-courses">
+                    <h2>Các khóa học được đăng kí nhiều nhất tuần</h2>
+                    <div class="courses-weekly"></div>
+                </div>
+                <h2>Tất cả khóa học</h2>
+                <div class="courses"></div>
+                <div class="pagination">
+                    <button id="prev-page" disabled>&laquo; Về Trước</button>
+                    <ul id="page-numbers"></ul>
+                    <button id="next-page">Tiếp &raquo;</button>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script>
+        let courses = <%- JSON.stringify(courses) %>;
+        let filteredCourses = courses;
+        let currentPage = 1;
+        const coursesPerPage = 16;
+        const maxPageButtons = 5;
+
+        function renderCourses(page) {
+    const coursesContainer = document.querySelector('.courses');
+    const paginationContainer = document.querySelector('.pagination');
+    const start = (page - 1) * coursesPerPage;
+    const end = start + coursesPerPage;
+    const coursesToDisplay = filteredCourses.slice(start, end);
+
+    coursesContainer.innerHTML = '';
+
+    if (filteredCourses.length === 0) {
+        coursesContainer.innerHTML = '<p>Không có khóa học phù hợp được đăng tải.</p>';
+        paginationContainer.style.display = 'none';
+    } else {
+       
+        coursesToDisplay.forEach(course => {
+            const courseElement = document.createElement('div');
+            courseElement.className = 'course';
+            courseElement.setAttribute('data-id', course.IDKhoaHoc);
+            courseElement.innerHTML = `
+                <img src="${course.AnhKhoaHoc || '/img/image.png'}" alt="">
+                <div class="course-info">
+                    <h3>${course.TenKhoaHoc}</h3>
+                    <p class="rating">
+                        ${course.SoLuongDanhGia > 0 ? `⭐ ${course.DiemTrungBinh.toFixed(1)} (${course.SoLuongDanhGia} ratings)` : 'Chưa có đánh giá'}
+                    </p>
+                    <p class="price">₹ free</p>
+                </div>
+            `;
+            coursesContainer.appendChild(courseElement);
+        });
+        updatePagination();
+        addCourseListeners();
+    }
+}
+
+
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredCourses.length / coursesPerPage);
+            document.getElementById('prev-page').disabled = currentPage === 1;
+            document.getElementById('next-page').disabled = currentPage === totalPages;
+
+            const pageNumbers = document.getElementById('page-numbers');
+            pageNumbers.innerHTML = '';
+
+            let startPage = Math.max(1, currentPage - Math.floor(maxPageButtons / 2));
+            let endPage = Math.min(totalPages, startPage + maxPageButtons - 1);
+
+            if (endPage - startPage < maxPageButtons - 1) {
+                startPage = Math.max(1, endPage - maxPageButtons + 1);
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                const li = document.createElement('li');
+                li.textContent = i;
+                li.classList.add('page-number');
+                if (i === currentPage) {
+                    li.classList.add('active');
+                }
+                li.addEventListener('click', () => {
+                    currentPage = i;
+                    renderCourses(currentPage);
+                });
+                pageNumbers.appendChild(li);
+            }
+        }
+
+        document.getElementById('prev-page').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderCourses(currentPage);
+            }
+        });
+
+        document.getElementById('next-page').addEventListener('click', () => {
+            if (currentPage < Math.ceil(filteredCourses.length / coursesPerPage)) {
+                currentPage++;
+                renderCourses(currentPage);
+            }
+        });
+
+        function addCourseListeners() {
+            document.querySelectorAll('.course').forEach(course => {
+                course.addEventListener('click', function() {
+                    const courseId = this.getAttribute('data-id');
+                    window.location.href = `/courseInfo/${courseId}`;
+                });
+            });
+        }
+
+        renderCourses(currentPage);
+
+        function searchCourses(query) {
+            fetch(`/search?query=${query}`)
+                .then(response => response.json())
+                .then(results => {
+                    const resultsContainer = document.getElementById('search-results');
+                    resultsContainer.innerHTML = '';
+                    if (results.length > 0) {
+                        results.forEach(course => {
+                            const courseElement = document.createElement('div');
+                            courseElement.className = 'search-result-item';
+                            courseElement.setAttribute('data-id', course.IDKhoaHoc);
+                            courseElement.innerHTML = `
+                                    <img src="${course.AnhKhoaHoc || '/img/image.png'}" alt="">
+                                    <div class="course-info">
+                                        <h3>${course.TenKhoaHoc}</h3>
+                                        <div class="rating">
+                                            ${course.DiemTrungBinh != null && course.SoLuongDanhGia != null ? 
+                                                `⭐ ${course.DiemTrungBinh.toFixed(1)} (${course.SoLuongDanhGia} ratings)` :
+                                                'Chưa có đánh giá'
+                                            }
+                                        </div>
+                                        <div class="price">₹ free</div>
+                                    </div>
+                            `;
+                            resultsContainer.appendChild(courseElement);
+                        });
+                        resultsContainer.style.display = 'block';
+                        addSearchResultListeners();
+                    } else {
+                        resultsContainer.innerText = 'Không tìm thấy khóa học';
+                    }
+                })
+                .catch(error => console.error('Error fetching courses:', error));
+        }
+
+        function addSearchResultListeners() {
+            document.querySelectorAll('.search-result-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const courseId = this.getAttribute('data-id');
+                    window.location.href = `/courseInfo/${courseId}`;
+                });
+            });
+        }
+
+        function filterCoursesByCategory(categoryId) {
+        const twc= document.querySelector('.top-weekly-courses');
+        twc.style.display = 'none';
+    fetch(`/courses?categoryId=${categoryId}`)
+        .then(response => response.json())
+        .then(results => {
+            filteredCourses = results;
+            currentPage = 1;
+            renderCourses(currentPage);
+        })
+        .catch(error => console.error('Error fetching courses by category:', error));
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const searchBar = document.querySelector('.search-bar');
+    const searchResults = document.getElementById('search-results');
+
+    document.addEventListener('click', function(event) {
+        if (!searchBar.contains(event.target) && !searchResults.contains(event.target)) {
+            searchResults.style.display = 'none';
+        }
+    });
+
+    fetchTopWeeklyCourses();
+});
+function fetchTopWeeklyCourses() {
+    fetch('/api/courses/top-weekly')
+        .then(response => response.json())
+        .then(results => {
+            const weeklyCoursesContainer = document.querySelector('.courses-weekly');
+            weeklyCoursesContainer.innerHTML = '';
+
+            if (results.length > 0) {
+                results.forEach(course => {
+                    const courseElement = document.createElement('div');
+                    courseElement.className = 'course';
+                    courseElement.setAttribute('data-id', course.IDKhoaHoc);
+                    courseElement.innerHTML = `
+                        <img src="${course.AnhKhoaHoc || '/img/image.png'}" alt="">
+                        <div class="course-info">
+                            <h3>${course.TenKhoaHoc}</h3>
+                            <p class="rating">
+                                ${course.SoLuongDanhGia > 0 ? `⭐ ${course.DiemTrungBinh.toFixed(1)} (${course.SoLuongDanhGia} ratings)` : 'Chưa có đánh giá'}
+                            </p>
+                            <p class="price">₹ free</p>
+                        </div>
+                    `;
+                    weeklyCoursesContainer.appendChild(courseElement);
+                });
+                addCourseListeners('.courses-weekly .course');
+            } else {
+                weeklyCoursesContainer.innerHTML = '<p>Không có khóa học phù hợp được đăng tải.</p>';
+                paginationContainer.style.display = 'none';
+            }
+        })
+        .catch(error => console.error('Error fetching top weekly courses:', error));
+}
+
+function addCourseListeners(selector = '.course') {
+    document.querySelectorAll(selector).forEach(course => {
+        course.addEventListener('click', function() {
+            const courseId = this.getAttribute('data-id');
+            window.location.href = `/courseInfo/${courseId}`;
+        });
+    });
+}
+        function toggleCategories() {
+            const categories = document.getElementById("categories");
+            categories.classList.toggle("active");
+        }
+    </script>
+</body>
+</html>

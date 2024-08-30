@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S.HELP</title>
+    <link rel="stylesheet" href="/css/auth.css">
+    <link rel="icon" href="/img/logo.png" sizes="16x16" type="image/png">
+
+</head>
+<body>
+    <header>
+        <div class="header-left" onclick="window.location.href='/home'">
+            <img src="/img/logo.png" alt="Logo" class="logo">
+            <h1>U.COURSE</h1>
+        </div>
+        <div class="header-right">
+            <button class="btn" onclick="window.location.href='/register'">Đăng kí</button>
+            <button class="btn logout" onclick="window.location.href='/login'">Đăng nhập</button>
+        </div>
+    </header>
+    <main>
+        <div class="container">
+            <div class="left-section">
+                <h1>Resume your learning with <span class="brand">U.COURSE</span></h1>
+            </div>
+            <div class="right-section">
+                <h1 class="or">ĐĂNG NHẬP</h1>
+                <form action="/login" method="POST">
+                    <input type="email" name="email" placeholder="Email" required>
+                    <input type="password" name="password" placeholder="Password" required>
+                    <% if (typeof loginError != "undefined" && loginError) { %>
+                        <div class="text-danger text-left mb-3"><%= loginError %></div>
+                    <% } %>
+                    <button type="submit">Đăng Nhập</button>
+                </form>
+                <div class="login-link">Bạn chưa có tài khoản? <a href="/register">Đăng kí</a></div>
+                <div class="login-link">Quên mật khẩu? <a href="/forgot">Quên</a></div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

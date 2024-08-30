@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lí U.C</title>
+    <link rel="stylesheet" href="/css/admin.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-beta.1/js/select2.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-beta.1/css/select2.min.css" />
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
+    <link rel="icon" href="/img/logo.png" sizes="16x16" type="image/png">
+</head>
+
+<body>
+    <header>
+        <div class="header-left">
+            <img src="/img/logo.png" alt="" class="logo">
+            <h1>Quản lí U.C</h1>
+        </div>
+        <div class="header-right">
+            <button class="btn logout">Đăng xuất</button>
+        </div>
+    </header>
+    <div class="container">
+        <div class="sidebar">
+            <ul>
+                <li><a href="#" onclick="showPage('statistics')" class="active">Thống kê</a></li>
+                <li><a href="#" onclick="showPage('course-management')">Quản lý khóa học</a></li>
+                <li><a href="#" onclick="showPage('user-management')">Quản lý người dùng</a></li>
+                <li><a href="#" onclick="showPage('category-management')">Quản lý danh mục</a></li>
+                <li><a href="#" onclick="showPage('tags-management')">Quản lý thẻ</a></li>
+            </ul>
+        </div>
+        <div class="main-content">
+            <!-- thống kê -->
+            <div id="statistics-page" class="page">
+                <h2>Thống kê</h2>
+                <!-- Phần 1 -->
+                <h3>Các khóa học có lượt đăng kí nhiều nhất tuần</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tên Khóa Học</th>
+                            <th>Mô Tả</th>
+                            <th>Ảnh Đại Diện</th>
+                            <th>Số lượt đánh giá</th>
+                            <th>Trung bình điểm</th>
+                            <th>Lượt đăng kí trong tuần</th>
+                            <th>Trạng thái</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="top-weekly-courses">
+                        <!-- Data will be loaded here dynamically -->
+                    </tbody>
+                </table>
+
+                <!-- Phần 2 -->
+                <h3>Khóa học có lượt đăng kí nhiều nhất</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tên Khóa Học</th>
+                            <th>Mô Tả</th>
+                            <th>Ảnh Đại Diện</th>
+                            <th>Số lượt đánh giá</th>
+                            <th>Trung bình điểm</th>
+                            <th>Tất cả lượt đăng kí</th>
+                            <th>Trạng thái</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="top-courses">
+                        <!-- Data will be loaded here dynamically -->
+                    </tbody>
+                </table>
+                <div id="top-courses-pagination"></div>
+
+                <!-- Phần 3 -->
+                <h3>Số lượng người dùng mới trong tuần</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tên người dùng</th>
+                            <th>Email</th>
+                            <th>Số khóa học đăng kí</th>
+                            <th>Số khóa học đăng tải</th>
+                            <th>Số lượt đánh giá</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="new-users">
+                        <!-- Data will be loaded here dynamically -->
+                    </tbody>
+                </table>
+                <div id="new-users-pagination"></div>
+            </div>
+            <!-- quản lí khóa học -->
+            <div id="course-management-page" class="page">
+                <h2>Quản lý khóa học</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tên khóa học</th>
+                            <th>Mô tả</th>
+                            <th>Ảnh</th>
+                            <th>Số lượt đánh giá</th>
+                            <th>Trung bình điểm</th>
+                            <th>Lượt đăng kí</th>
+                            <th>Hành động</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody id="course-table-body">
+                        <!-- Data will be loaded here dynamically -->
+                    </tbody>
+                </table>
+                <div id="pagination-course"></div>
+
+            </div>
+            <!-- quản lí người dùng -->
+            <div id="user-management-page" class="page" style="display:none;">
+                <h2>Quản lý người dùng</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tên Người Dùng</th>
+                            <th>Email</th>
+                            <th>ẢNh Đại Diện</th>
+                            <th>Số Khóa Học Đăng Ký</th>
+                            <th>Số Khóa Học Đăng Tải</th>
+                            <th>Số Lượt Đánh Giá</th>
+                            <th>Hành Động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="user-table-body">
+                        <!-- Data will be loaded here dynamically -->
+                    </tbody>
+                </table>
+                <div id="pagination-user">
+
+                </div>
+            </div>
+            <!-- quản lí danh mục -->
+            <div id="category-management-page" class="page" style="display:none;">
+                <h2>Quản lý danh mục</h2>
+                <!-- Form for adding/updating categories -->
+                <div id="category-form">
+                    <label for="category-name">Tên danh mục:</label>
+                    <input type="text" id="category-name" name="category-name" required>
+
+                    <label for="category-description">Mô tả:</label>
+                    <input type="text" id="category-description" name="category-description" required>
+
+                    <button id="add-category-button" onclick="validateAndAddCategory()">Thêm</button>
+                    <button id="update-category-button" onclick="validateAndUpdateCategory()" disabled>Cập nhật</button>
+                    <button id="cancel-button" onclick="cancelEdit()">Hủy</button>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tên danh mục</th>
+                            <th>Mô tả</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="category-table-body">
+                        <!-- Data sẽ được tải động vào đây -->
+                    </tbody>
+                </table>
+
+                <div id="pagination">
+                    <!-- Pagination buttons will be loaded here dynamically -->
+                </div>
+            </div>
+
+            <!-- Quản lý tags -->
+            <div id="tags-management-page" class="page" style="display:none;">
+                <h2>Quản lý tags</h2>
+                <!-- Form for adding/updating tags -->
+                <div id="tags-form">
+                    <label for="tag-name">Tên tag:</label>
+                    <input type="text" id="tag-name" name="tag-name" required>
+
+                    <label for="tag-description">Mô tả:</label>
+                    <input type="text" id="tag-description" name="tag-description">
+
+                    <button id="add-tag-button" onclick="validateAndAddTag()">Thêm</button>
+                    <button id="update-tag-button" onclick="validateAndUpdateTag()" disabled>Cập nhật</button>
+                    <button id="cancel-tag-button" onclick="cancelTagEdit()">Hủy</button>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tên tag</th>
+                            <th>Mô tả</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tags-table-body">
+                        <!-- Data sẽ được tải động vào đây -->
+                    </tbody>
+                </table>
+
+                <div id="tags-pagination">
+                    <!-- Pagination buttons will be loaded here dynamically -->
+                </div>
+            </div>
+            <!-- thông tin chi tiết của khóa học -->
+            
+            <div id="course-details" style="display: none;"></div>
+
+            <div id="lessons-section" style="display: none;">
+                <h3>Danh sách bài học</h3>
+                <table id="lessons-list">
+                    <thead>
+                        <tr>
+                            <th>Tên bài học</th>
+                            <th>Loại bài học</th>
+                            <th>Mô tả bài học</th>
+                            <th>Thứ tự bài học</th>
+                            <th>Hành Động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Review rows will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+            <div id="reviews-section" style="display: none;">
+                <h3>Đánh giá khóa học</h3>
+                <table id="reviews-list">
+                    <thead>
+                        <tr>
+                            <th>Tên Người Đánh Giá</th>
+                            <th>Nội Dung</th>
+                            <th>Đánh Giá</th>
+                            <th>Hành Động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Review rows will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+            
+
+            <div id="lesson-details-overlay" class="overlay" style="display: none;">
+                <div class="form-container">
+                    <button onclick="hideLessonDetails()">Đóng</button>
+                    <div id="lessonTitle"></div>
+                    <div id="lessonDescription"></div>
+                    <video id="lessonVideo" controls>
+                        <source src="" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <div id="lessonText" class="lessonText"></div>
+                </div>
+            </div>
+
+
+            <div id="user-detail-form" class="modal">
+                <div class="modal-content">
+                    <span class="close" onclick="closeUserDetailForm()">&times;</span>
+                    <div id="user-detail-content"></div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+    <script>
+
+        // bắt sự kiện trong sidebar
+        function showPage(pageId) {
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => {
+                page.style.display = 'none';
+            });
+            document.getElementById(`${pageId}-page`).style.display = 'block';
+            document.querySelectorAll('.sidebar ul li a').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.querySelector(`.sidebar ul li a[onclick="showPage('${pageId}')"]`).classList.add('active');
+
+            if (pageId === 'statistics') {
+                document.getElementById('course-details').style.display = 'none';
+                document.getElementById('reviews-section').style.display = 'none';
+                document.getElementById('lessons-section').style.display = 'none';
+                loadStatistics();
+            } else if (pageId === 'course-management') {
+                document.getElementById('course-details').style.display = 'block';
+                document.getElementById('reviews-section').style.display = 'block';
+                document.getElementById('lessons-section').style.display = 'block';
+                loadCourses(); // Ensure courses are loaded
+            } else if (pageId === 'user-management') {
+                document.getElementById('course-details').style.display = 'none';
+                document.getElementById('reviews-section').style.display = 'none';
+                document.getElementById('lessons-section').style.display = 'none';
+                loadUsers();
+            } else if (pageId === 'category-management') {
+                document.getElementById('course-details').style.display = 'none';
+                document.getElementById('reviews-section').style.display = 'none';
+                document.getElementById('lessons-section').style.display = 'none';
+                loadCategories();
+            } else if (pageId === 'tags-management') {
+                document.getElementById('course-details').style.display = 'none';
+                document.getElementById('reviews-section').style.display = 'none';
+                document.getElementById('lessons-section').style.display = 'none';
+                loadTags();
+            }
+        }
+
+        // sự kiện chọn khóa học
+        function selectCourse(courseId) {
+            showPage('course-management');
+            closeUserDetailForm()
+            // Wait for the page to be visible before scrolling and highlighting
+            setTimeout(() => {
+                const courseElement = document.getElementById(`course-${courseId}`);
+                if (courseElement) {
+                    courseElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    courseElement.classList.add('blink'); // Add blinking effect
+
+                    // Remove the blink class after the animation ends
+                    setTimeout(() => {
+                        courseElement.classList.remove('blink');
+                    }, 2000);
+                } else {
+                    console.error(`Course element with ID ${courseId} not found.`);
+                }
+            }, 500); // Adjust this delay if necessary
+        }
+
+
+
+        function loadStatistics() {
+            loadTopWeeklyCourses();
+            loadTopCourses(1);
+            loadNewUsers(1);
+        }
+        // Function to check if a value is null or empty
+        function checkValue(value) {
+            return value ? value : 'Chưa có';
+        }
+        // hàm show khóa học được nhiều đăng kí nhất tuần
+        function loadTopWeeklyCourses() {
+            fetch('/api/courses/top-weekly')
+                .then(response => response.json())
+                .then(data => {
+                    const topWeeklyCoursesBody = document.getElementById('top-weekly-courses');
+                    topWeeklyCoursesBody.innerHTML = '';
+                    data.forEach(course => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                    <td>${checkValue(course.TenKhoaHoc)}</td>
+                    <td>${checkValue(course.MoTaKhoaHoc)}</td>
+                    <td><img src="${course.AnhKhoaHoc}" alt="Ảnh khóa học chưa có" style="width: 100px; height: auto;"></td>
+                    <td>${checkValue(course.SoLuotDanhGia)}</td>
+                    <td>${checkValue(course.TrungBinhDiemDanhGia)}</td>
+                    <td>${checkValue(course.TongLuotDangKy)}</td>
+                    <td>${checkValue(course.TrangThaiKhoaHoc)}</td>
+                    <td><button onclick="selectCourse('${course.IDKhoaHoc}')">Chọn</button></td>
+                `;
+                        topWeeklyCoursesBody.appendChild(row);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading top weekly courses:', error);
+                });
+        }
+
+        // hàm show khóa học dc nhiều đăng kí nhất
+        function loadTopCourses(page) {
+            fetch(`/api/courses/top?page=${page}`)
+                .then(response => response.json())
+                .then(data => {
+                    const topCoursesBody = document.getElementById('top-courses');
+                    topCoursesBody.innerHTML = '';
+                    data.courses.forEach(course => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                   <td>${checkValue(course.TenKhoaHoc)}</td>
+                        <td>${checkValue(course.MoTaKhoaHoc)}</td>
+                        <td><img src="${course.AnhKhoaHoc}" alt="Ảnh khóa học chưa có" style="width: 100px; height: auto;"></td>
+                        <td>${checkValue(course.SoLuotDanhGia)}</td>
+                        <td>${checkValue(course.TrungBinhDiemDanhGia)}</td>
+                        <td>${checkValue(course.TongLuotDangKy)}</td>
+                        <td>${checkValue(course.TrangThaiKhoaHoc)}</td>
+
+                    <td><button onclick="selectCourse('${course.IDKhoaHoc}')">Chọn</button></td>
+                `;
+                        topCoursesBody.appendChild(row);
+                    });
+
+                    const pagination = document.getElementById('top-courses-pagination');
+                    pagination.innerHTML = '';
+                    for (let i = 1; i <= data.totalPages; i++) {
+                        const button = document.createElement('button');
+                        button.textContent = i;
+                        button.onclick = () => loadTopCourses(i);
+                        if (i === page) {
+                            button.disabled = true;
+                        }
+                        pagination.appendChild(button);
+                    }
+                });
+        }
+        // hàm show người dùng đăng kí mới
+        function loadNewUsers(page) {
+            fetch(`/api/users/new?page=${page}`)
+                .then(response => response.json())
+                .then(data => {
+                    const newUsersBody = document.getElementById('new-users');
+                    newUsersBody.innerHTML = '';
+                    data.users.forEach(user => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                    <td>${user.HoTenNguoiDung}</td>
+                    <td>${user.Email}</td>
+                    <td><img src="${user.AnhDaiDien}" alt="Ảnh khóa học chưa có" style="width: 100px; height: auto;"></td>
+                    <td>${user.SoKhoaHocDaDangKy}</td>
+                    <td>${user.SoKhoaHocDaDangTai}</td>
+                    <td>${user.SoLuotDanhGia}</td>
+                    <td><button onclick="viewUser('${user.IDNguoiDung}')">Chọn</button></td>
+                `;
+                        newUsersBody.appendChild(row);
+                    });
+
+                    const pagination = document.getElementById('new-users-pagination');
+                    pagination.innerHTML = '';
+                    for (let i = 1; i <= data.totalPages; i++) {
+                        const button = document.createElement('button');
+                        button.textContent = i;
+                        button.onclick = () => loadNewUsers(i);
+                        if (i === page) {
+                            button.disabled = true;
+                        }
+                        pagination.appendChild(button);
+                    }
+                });
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            showPage('statistics'); // Show statistics page by default on page load
+        });
+        // hàm quản lí khóa học
+        function loadCourses(page = 1) {
+            fetch(`/api/courses?page=${page}&limit=10`)
+                .then(response => response.json())
+                .then(data => {
+                    const courseTableBody = document.getElementById('course-table-body');
+                    courseTableBody.innerHTML = '';
+
+                    data.courses.forEach(course => {
+                        const row = document.createElement('tr');
+                        row.id = `course-${course.IDKhoaHoc}`; // Add unique ID for the course row
+                        row.innerHTML = `
+                    <td>${checkValue(course.TenKhoaHoc)}</td>
+                    <td>${checkValue(course.MoTaKhoaHoc)}</td>
+                    <td><img src="${course.AnhKhoaHoc}" alt="Ảnh khóa học chưa có" style="width: 100px; height: auto;"></td>
+                    <td>${checkValue(course.SoLuotDanhGia)}</td>
+                    <td>${checkValue(course.TrungBinhDiemDanhGia)}</td>
+                    <td>${checkValue(course.TongLuotDangKy)}</td>
+                    <td>
+                        <button onclick="viewCourse(${course.IDKhoaHoc})">Xem</button>
+                        <button onclick="editCourse(${course.IDKhoaHoc})">Thông báo</button>
+                    </td>
+                    <td>
+                        <select onchange="updateApprovalStatus(${course.IDKhoaHoc}, this.value)">
+                            <option value="Đã duyệt" ${course.TrangThaiKhoaHoc === 'Đã duyệt' ? 'selected' : ''}>Đã duyệt</option>
+                            <option value="Đang chờ duyệt" ${course.TrangThaiKhoaHoc === 'Đang chờ duyệt' ? 'selected' : ''}>Đang chờ duyệt</option>
+                            <option value="Không được duyệt" ${course.TrangThaiKhoaHoc === 'Không được duyệt' ? 'selected' : ''}>Không được duyệt</option>
+                        </select>
+                    </td>
+                `;
+                        courseTableBody.appendChild(row);
+                    });
+
+                    // Handle pagination buttons
+                    const pagination = document.getElementById('pagination-course');
+                    pagination.innerHTML = '';
+
+                    for (let i = 1; i <= data.totalPages; i++) {
+                        const pageButton = document.createElement('button');
+                        pageButton.innerText = i;
+                        pageButton.onclick = () => loadCourses(i);
+                        pagination.appendChild(pageButton);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading courses:', error);
+                });
+        }
+        // hàm quản lí người dùng
+        function loadUsers(page = 1) {
+            fetch(`/api/users?page=${page}&limit=10`)
+                .then(response => response.json())
+                .then(data => {
+                    const userTableBody = document.getElementById('user-table-body');
+                    userTableBody.innerHTML = '';
+
+                    data.users.forEach(user => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                    <td>${user.HoTenNguoiDung}</td>
+                    <td>${user.Email}</td>
+                    <td><img src="${user.AnhDaiDien}" alt="Ảnh khóa học chưa có" style="width: 100px; height: auto;"></td>
+                    <td>${user.SoKhoaHocDaDangKy}</td>
+                    <td>${user.SoKhoaHocDaDangTai}</td>
+                    <td>${user.SoLuotDanhGia}</td>
+                    <td>
+                        <button onclick="viewUser(${user.IDNguoiDung})">Xem</button>
+                        <button onclick="notifyUser(${user.IDNguoiDung})">Thông báo</button>
+                    </td>
+                `;
+                        userTableBody.appendChild(row);
+                    });
+
+                    // Handle pagination buttons
+                    const pagination = document.getElementById('pagination-user');
+                    pagination.innerHTML = '';
+
+                    for (let i = 1; i <= data.totalPages; i++) {
+                        const pageButton = document.createElement('button');
+                        pageButton.innerText = i;
+                        pageButton.onclick = () => loadUsers(i);
+                        pagination.appendChild(pageButton);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+
+        // hàm quản lí danh mục
+        let currentEditingCategoryId = null;
+
+        function loadCategories(page = 1) {
+            fetch(`/api/categories?page=${page}&limit=10`)
+                .then(response => response.json())
+                .then(data => {
+                    const categoryTableBody = document.getElementById('category-table-body');
+                    categoryTableBody.innerHTML = '';
+                    data.categories.forEach(category => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                    <td>${checkValue(category.TenDanhMuc)}</td>
+                    <td>${checkValue(category.MoTaDanhMuc)}</td>
+                    <td>
+                        <button onclick="editCategory(${category.IDDanhMuc}, '${category.TenDanhMuc}', '${category.MoTaDanhMuc}')">Sửa</button>
+                        <button onclick="deleteCategory(${category.IDDanhMuc})">Xóa</button>
+                    </td>
+                `;
+                        categoryTableBody.appendChild(row);
+                    });
+
+                    // Handle pagination buttons
+                    const pagination = document.getElementById('pagination');
+                    pagination.innerHTML = '';
+
+                    for (let i = 1; i <= data.totalPages; i++) {
+                        const pageButton = document.createElement('button');
+                        pageButton.innerText = i;
+                        pageButton.onclick = () => loadCategories(i);
+                        pagination.appendChild(pageButton);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+        // thông báo
+        function validateAndAddCategory() {
+            const name = document.getElementById('category-name').value;
+
+            if (name) {
+                addCategory(name);
+            } else {
+                alert('Vui lòng điền đầy đủ thông tin.'); ``
+            }
+        }
+
+        function validateAndUpdateCategory() {
+            const name = document.getElementById('category-name').value;
+
+            if (name) {
+                updateCategory(name);
+            } else {
+                alert('Vui lòng điền đầy đủ thông tin.');
+            }
+        }
+        function addCategory() {
+            const name = document.getElementById('category-name').value;
+            const description = document.getElementById('category-description').value;
+
+            fetch('/api/categories', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name, description })
+            })
+                .then(response => response.json())
+                .then(() => {
+                    loadCategories();
+                    clearForm();
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function editCategory(id, name, description) {
+            currentEditingCategoryId = id;
+            document.getElementById('category-name').value = name;
+            document.getElementById('category-description').value = description;
+            document.getElementById('add-category-button').disabled = true;
+            document.getElementById('update-category-button').disabled = false;
+        }
+
+        function updateCategory() {
+            const name = document.getElementById('category-name').value;
+            const description = document.getElementById('category-description').value;
+
+            fetch(`/api/categories/${currentEditingCategoryId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name, description })
+            })
+                .then(response => response.json())
+                .then(() => {
+                    loadCategories();
+                    clearForm();
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function deleteCategory(categoryId) {
+            if (confirm('Bạn có chắc chắn muốn xóa danh mục này?')) {
+                fetch(`/api/categories/${categoryId}`, {
+                    method: 'DELETE'
+                })
+                    .then(response => response.json())
+                    .then(() => {
+                        loadCategories();
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+        }
+        function cancelEdit() {
+            clearForm();
+        }
+
+        function clearForm() {
+            currentEditingCategoryId = null;
+            document.getElementById('category-name').value = '';
+            document.getElementById('category-description').value = '';
+            document.getElementById('add-category-button').disabled = false;
+            document.getElementById('update-category-button').disabled = true;
+        }
+
+        // hàm quản lí tag
+        let currentEditingTagId = null;
+
+        function loadTags(page = 1) {
+            fetch(`/api/tags?page=${page}&limit=10`)
+                .then(response => response.json())
+                .then(data => {
+                    const tagsTableBody = document.getElementById('tags-table-body');
+                    tagsTableBody.innerHTML = '';
+                    data.tags.forEach(tag => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `   
+                    <td>${checkValue(tag.TenTag)}</td>
+                    <td>${checkValue(tag.MoTa)}</td>
+                    <td>
+                        <button onclick="editTag(${tag.IDTag}, '${tag.TenTag}', '${tag.MoTa}')">Sửa</button>
+                        <button onclick="deleteTag(${tag.IDTag})">Xóa</button>
+                    </td>
+                `;
+                        tagsTableBody.appendChild(row);
+                    });
+
+                    // Handle pagination buttons
+                    const pagination = document.getElementById('tags-pagination');
+                    pagination.innerHTML = '';
+
+                    for (let i = 1; i <= data.totalPages; i++) {
+                        const pageButton = document.createElement('button');
+                        pageButton.innerText = i;
+                        pageButton.onclick = () => loadTags(i);
+                        pagination.appendChild(pageButton);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // JavaScript functions
+        function validateAndAddTag() {
+            const name = document.getElementById('tag-name').value;
+            const description = document.getElementById('tag-description').value;
+
+            if (name) {
+                addTag(name, description);
+            } else {
+                alert('Vui lòng điền đầy đủ thông tin.');
+            }
+        }
+
+        function validateAndUpdateTag() {
+            const name = document.getElementById('tag-name').value;
+            const description = document.getElementById('tag-description').value;
+
+            if (name) {
+                updateTag(name, description);
+            } else {
+                alert('Vui lòng điền đầy đủ thông tin.');
+            }
+        }
+
+        function addTag(name, description) {
+
+            fetch('/api/tags', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name, description })
+            })
+                .then(response => response.json())
+                .then(() => {
+                    loadTags();
+                    clearTagForm();
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function editTag(id, name, description) {
+            currentEditingTagId = id;
+            document.getElementById('tag-name').value = name;
+            document.getElementById('tag-description').value = description;
+            document.getElementById('add-tag-button').disabled = true;
+            document.getElementById('update-tag-button').disabled = false;
+        }
+
+        function updateTag() {
+            const name = document.getElementById('tag-name').value;
+            const description = document.getElementById('tag-description').value;
+
+            fetch(`/api/tags/${currentEditingTagId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name, description })
+            })
+                .then(response => response.json())
+                .then(() => {
+                    loadTags();
+                    clearTagForm();
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function deleteTag(tagId) {
+            if (confirm('Bạn có chắc chắn muốn xóa tag này?')) {
+                fetch(`/api/tags/${tagId}`, {
+                    method: 'DELETE'
+                })
+                    .then(response => response.json())
+                    .then(() => {
+                        loadTags();
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+        }
+
+        function cancelTagEdit() {
+            clearTagForm();
+        }
+
+        function clearTagForm() {
+            currentEditingTagId = null;
+            document.getElementById('tag-name').value = '';
+            document.getElementById('tag-description').value = '';
+            document.getElementById('add-tag-button').disabled = false;
+            document.getElementById('update-tag-button').disabled = true;
+        }
+
+        // thông tin người dùng
+        function viewUser(userId) {
+            fetch(`/api/user/${userId}`)
+                .then(response => response.json())
+                .then(user => {
+                    if (user) {
+                        const userDetailContent = document.getElementById('user-detail-content');
+                        userDetailContent.innerHTML = `
+                    <h3>Khóa học đăng kí</h3>
+                    <table>
+                        <tr>
+                            <th>Tên khóa học</th>
+                            <th>Mô tả học</th>
+                            <th>Ảnh khóa học</th>
+                            <th>Số lượt đánh giá</th>
+                            <th>Trung bình điểm</th>
+                            <th>Lượt đăng kí</th>
+                            <th>Trạng thái</th>
+                            <th>Hành động</th>
+                        </tr>
+                        ${user.KhoaHocDangKi.map(course => `
+                            <tr>
+                            <td>${checkValue(course.TenKhoaHoc)}</td>
+                            <td>${checkValue(course.MoTaKhoaHoc)}</td>
+                            <td><img src="${course.AnhKhoaHoc}" alt="Ảnh khóa học chưa có" style="width: 100px; height: auto;"></td>
+                            <td>${checkValue(course.SoLuotDanhGia)}</td>
+                            <td>${checkValue(course.TrungBinhDiemDanhGia)}</td>
+                            <td>${checkValue(course.TongLuotDangKy)}</td>
+                            <td>${course.TrangThaiKhoaHoc}</td>
+                             <td><button onclick="selectCourse('${course.IDKhoaHoc}')">Chọn</button></td>
+
+                            </tr>
+                        `).join('')}
+                    </table>
+                    <h3>Khóa học đăng tải</h3>
+                    <table>
+                        <tr>
+                            <th>Tên khóa học</th>
+                            <th>Mô tả học</th>
+                            <th>Ảnh khóa học</th>
+                            <th>Số lượt đánh giá</th>
+                            <th>Trung bình điểm</th>
+                            <th>Lượt đăng kí</th>
+                            <th>Trạng thái</th>
+                            <th>Hành động</th>
+                        </tr>
+                        ${user.KhoaHocDangTai.length > 0 ? user.KhoaHocDangTai.map(course => `
+                            <tr>
+                            <td>${checkValue(course.TenKhoaHoc)}</td>
+                            <td>${checkValue(course.MoTaKhoaHoc)}</td>
+                            <td><img src="${course.AnhKhoaHoc}" alt="Ảnh khóa học chưa có" style="width: 100px; height: auto;"></td>
+                            <td>${checkValue(course.SoLuotDanhGia)}</td>
+                            <td>${checkValue(course.TrungBinhDiemDanhGia)}</td>
+                            <td>${checkValue(course.TongLuotDangKy)}</td>
+                            <td>${course.TrangThaiKhoaHoc}</td>
+                             <td><button onclick="selectCourse('${course.IDKhoaHoc}')">Chọn</button></td>
+                            </tr>
+                        `).join('') : '<tr><td colspan="8">Không có khóa học đăng tải</td></tr>'}
+                    </table>
+                    <h3>Bình luận và đánh giá</h3>
+                    <table>
+                        <tr>
+                            <th>Tên Khóa học</th>
+                            <th>Nội dung đánh giá</th>
+                            <th>Điểm đánh giá</th>
+                            <th>Hành động</th>
+                        </tr>
+                        ${user.BinhLuanDanhGia.length > 0 ? user.BinhLuanDanhGia.map(comment => `
+                            <tr>
+                                <td>${comment.TenKhoaHoc}</td>
+                                <td>${comment.BinhLuan}</td>
+                                <td>${comment.DiemDanhGia}</td>
+                                <td><button onclick="selectCourse('${comment.IDKhoaHoc}')">Chọn</button></td>
+                            </tr>
+                        `).join('') : '<tr><td colspan="4">Không có bình luận</td></tr>'}
+                    </table>
+                `;
+                        document.getElementById('user-detail-form').style.display = 'block';
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function closeUserDetailForm() {
+            document.getElementById('user-detail-form').style.display = 'none';
+        }
+        // hàm show thông tin bài học
+        function viewLessonDetails(lessonId) {
+            const lessonTitle = document.getElementById('lessonTitle');
+            const lessonDescription = document.getElementById('lessonDescription');
+            const lessonVideo = document.getElementById('lessonVideo');
+            const lessonText = document.getElementById('lessonText');
+            const videoSource = lessonVideo.querySelector('source');
+
+            // Hide all elements initially
+            lessonTitle.style.display = 'none';
+            lessonDescription.style.display = 'none';
+            lessonVideo.style.display = 'none';
+            lessonText.style.display = 'none';
+
+            // Fetch lesson details from the API
+            fetch(`/api/lessons/${lessonId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const { TenBaiHoc, MoTaBaiHoc, LoaiBaiHoc, FileBaiHoc } = data.lesson;
+
+                    // Display title and description
+                    lessonTitle.innerText = TenBaiHoc;
+                    lessonDescription.innerText = MoTaBaiHoc;
+                    lessonTitle.style.display = 'block';
+                    lessonDescription.style.display = 'block';
+
+                    if (LoaiBaiHoc === 'video') {
+                        videoSource.setAttribute('src', `/course/lesson/${FileBaiHoc}`);
+                        lessonVideo.style.display = 'block';
+                        lessonVideo.load();
+                        lessonVideo.play();
+                    } else if (LoaiBaiHoc === 'text') {
+                        document.getElementById('lessonTitle').style.display = 'none';
+                        document.getElementById('lessonDescription').style.display = 'none';
+                        lessonText.innerHTML = FileBaiHoc;
+                        lessonText.style.display = 'block';
+
+                        lessonText.scrollTop = 0; // Reset scroll position to the top
+                    }
+
+                    document.getElementById('lesson-details-overlay').style.display = 'flex';
+                })
+                .catch(error => {
+                    console.error('Error fetching lesson details:', error);
+                });
+        }
+
+        // Function to hide lesson details
+        function hideLessonDetails() {
+            const video = document.getElementById('lessonVideo');
+            if (video) {
+                video.pause(); // Tạm dừng video
+                video.currentTime = 0; // Đặt lại thời gian phát video về 0 nếu cần thiết
+            }
+            document.getElementById('lesson-details-overlay').style.display = 'none';
+        }
+
+// Show thông tin chi tiết khóa học
+function viewCourse(courseId) {
+    fetch(`/api/courses/${courseId}`)
+        .then(response => response.json())
+        .then(data => {
+            console.log(data); // Check the returned data from the API
+            const courseDetailsSection = document.getElementById('course-details');
+            const lessonsList = document.getElementById('lessons-list').querySelector('tbody');
+            const reviewsList = document.getElementById('reviews-list').querySelector('tbody');
+
+            // Render course details
+            courseDetailsSection.innerHTML = `
+                <h2>${data.course.TenKhoaHoc}</h2>
+                <p><strong>Mô tả:</strong> ${data.course.MoTaKhoaHoc}</p>
+                <p><strong>Trạng thái:</strong> ${data.course.TrangThaiKhoaHoc}</p>
+                <p><strong>Số lượng đánh giá:</strong> ${data.course.SoLuongDanhGia}</p>
+                <p><strong>Điểm trung bình:</strong> ${data.course.DiemTrungBinh}</p>
+                <p><strong>Danh mục:</strong> 
+                    <select id="course-category-${courseId}">
+                        ${data.categories.map(category => `
+                            <option value="${category.IDDanhMuc}" ${category.IDDanhMuc === data.course.IDDanhMuc ? 'selected' : ''}>
+                                ${category.TenDanhMuc}
+                            </option>
+                        `).join('')}
+                    </select>
+                </p>
+                <p><strong>Thẻ:</strong> 
+                    <select name="Tags[]" id="Tags" multiple="multiple" style="width: 100%;" required></select>
+                </p>
+                <button id="saveInfo" onclick="saveCourseDetails(${courseId})">Lưu</button>
+            `;
+
+            // Check if there are lessons
+            if (data.lessons.length > 0) {
+                // Render lessons list
+                lessonsList.innerHTML = '';
+                data.lessons.forEach(lesson => {
+                    const lessonRow = document.createElement('tr');
+                    lessonRow.innerHTML = `
+                        <td>${lesson.TenBaiHoc}</td>
+                        <td>${lesson.LoaiBaiHoc}</td>
+                        <td>${lesson.MoTaBaiHoc}</td>
+                        <td>${lesson.ThuTuBaiHoc}</td>
+                        <td><button onclick="viewLessonDetails('${lesson.IDBaiHoc}')">Xem</button></td>
+                    `;
+                    lessonsList.appendChild(lessonRow);
+                });
+
+                // Display lessons list
+                document.getElementById("lessons-section").style.display = 'block';
+            } else {
+                lessonsList.innerHTML = `
+                    <tr>
+                        <td colspan="4" style="text-align: center;">Không có bài học nào</td>
+                    </tr>
+                `;
+                document.getElementById("lessons-section").style.display = 'block';
+            }
+
+            // Render reviews
+            if (data.reviews.length > 0) {
+                reviewsList.innerHTML = '';
+                data.reviews.forEach(review => {
+                    const reviewRow = document.createElement('tr');
+                    reviewRow.innerHTML = `
+                        <td>${review.HoTenNguoiDung}</td>
+                        <td>${review.BinhLuan}</td>
+                        <td>${review.DiemDanhGia}</td>
+                        <td><button onclick="deleteReview('${review.IDKhoaHoc}','${review.IDNguoiDung}')">Xóa</button></td>
+                    `;
+                    reviewsList.appendChild(reviewRow);
+                });
+
+                // Display reviews section
+                document.getElementById("reviews-section").style.display = 'block';
+            } else {
+                reviewsList.innerHTML = `
+                    <tr>
+                        <td colspan="4" style="text-align: center;">Không có đánh giá nào</td>
+                    </tr>
+                `;
+                document.getElementById("reviews-section").style.display = 'block';
+            }
+
+            // Initialize Select2 tags
+            $('#Tags').select2({
+                placeholder: 'Enter tags',
+                minimumInputLength: 2,
+                ajax: {
+                    url: '/tags',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function (params) {
+                        console.log('Search term:', params.term); // Log the search term
+                        return {
+                            q: params.term
+                        };
+                    },
+                    processResults: function (data) {
+                        console.log('Response data:', data); // Log the response data
+                        return {
+                            results: data.map(function (tag) {
+                                return {
+                                    id: tag.id,     // Ensure the ID is mapped correctly
+                                    text: tag.name  // Map the 'name' property to 'text'
+                                };
+                            })
+                        };
+                    },
+                    cache: true
+                }
+            });
+
+            // Pre-populate existing tags
+            const existingTags = data.courseTags;
+            existingTags.forEach(tag => {
+                const option = new Option(tag.TenTag, tag.IDTag, true, true);
+                $('#Tags').append(option).trigger('change');
+            });
+
+            console.log(existingTags); // Log existing tags to verify
+        })
+        .catch(error => {
+            console.error('Error fetching course details:', error);
+        });
+
+    document.getElementById("course-details").style.display = 'block';
+    document.getElementById("course-details").scrollIntoView({ behavior: 'smooth' });
+}
+
+//  xóa bình luận
+function deleteReview(courseId, userId) {
+    if (confirm('Are you sure you want to delete this review?')) {
+        console.log(`Deleting review with ID: ${courseId} and user ID: ${userId}`);
+        fetch(`/api/reviews/${courseId}/${userId}`, {
+            method: 'DELETE'
+        }).then(response => {
+            if (response.ok) {
+                // Parse the JSON response
+                return response.json();
+            } else {
+                // Log the error message and throw an error to be caught
+                return response.json().then(error => {
+                    console.error('Failed to delete review:', error.message);
+                    throw new Error('Failed to delete review');
+                });
+            }
+        }).then(data => {
+            // Log the success message
+            console.log(data.message);
+            viewCourse(courseId);
+        }).catch(error => {
+            console.error('Error deleting review:', error);
+            alert('Failed to delete review.');
+        });
+    }
+}
+
+        // thông báo
+        function editCourse(courseId) {
+            // Implement the logic to edit course details
+        }
+
+        function updateApprovalStatus(courseId, status) {
+            fetch(`/update-status/${courseId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ status })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message) {
+                        console.log(data.message);
+                    } else {
+                        console.log('Course status updated successfully');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating course status:', error);
+                });
+        }
+
+        // cập nhật khóa học 
+        function saveCourseDetails(courseId) {
+            const selectedCategory = document.getElementById(`course-category-${courseId}`).value;
+            const selectedTags = $('#Tags').val(); // Assuming Select2 is initialized on this element
+            const courseDetails = {
+                IDDanhMuc: selectedCategory,
+                Tags: selectedTags
+            };
+
+            fetch(`/admin/courses/${courseId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(courseDetails)
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Success:', data);
+                    alert('Khóa học đã được cập nhật thành công!');
+                    // Handle success - maybe redirect or show a message
+                })
+                .catch(error => {
+                    alert('Đã xảy ra lỗi khi cập nhật khóa học.');
+                    console.error('Error updating course:', error);
+                });
+        }
+        // thông báo thao tác
+        function showMessage(message, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.innerText = message;
+            document.body.appendChild(messageDiv);
+
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 3000);
+        }
+        document.querySelector('.btn.logout').addEventListener('click', function () {
+            fetch('/admin/logout', { method: 'GET' })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.href = '/admin/login';
+                    } else {
+                        alert('Logout failed');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        });
+    </script>
+</body>
+
+</html>

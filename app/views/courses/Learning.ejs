@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Learning</title>
+    <link rel="stylesheet" href="/css/Learning.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-beta.1/css/select2.min.css">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="icon" href="/img/logo.png" sizes="16x16" type="image/png">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+
+<body>
+    <header>
+        <div class="header-left" onclick="window.location.href='/home'">
+            <img src="/img/logo.png" alt="" class="logo">
+            <h1>U.COURSE</h1>
+        </div>
+        <div class="header-right">
+            <% if (user) { %>
+                <button class="btn" onclick="window.location.href='/profile'">Thông tin</button>
+                <div class="user-info">
+                    <button class="btn" id="rateCourseBtn">Đánh giá</button>
+                    <button class="btn" id="noteCourseBtn">Ghi chú</button>
+                    <form action="/logout" method="post" style="display: inline;">
+                        <button class="btn logout" type="submit">Đăng xuất</button>
+                    </form>
+                </div>
+            <% } else { %>
+                <button class="btn" onclick="window.location.href='/login'">Đăng nhập</button>
+            <% } %>
+        </div>
+    </header>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <button class="sidebar-toggle">☰</button>
+                <h2>Danh sách bài học</h2>
+            </div>
+            <ul>
+                <% if (lessons && lessons.length > 0) { %>
+                    <% lessons.forEach((lesson, index) => { %>
+                        <li class="<%= lesson.IDBaiHoc === currentLessonId ? 'active' : '' %>">
+                            <a href="#" data-lesson-id="<%= lesson.IDBaiHoc %>"
+                                class="<%= lesson.Completed ? 'completed' : (lesson.InProgress ? 'in-progress' : (index <= lessons.findIndex(l => l.IDBaiHoc === currentLessonId) ? '' : 'disabled')) %>">
+                                <%= lesson.TenBaiHoc %>
+                            </a>
+                        </li>
+                    <% }); %>
+                <% } else { %>
+                    <li>Không có bài học nào.</li>
+                <% } %>
+            </ul>
+            <div class="navigation-buttons">
+                <button id="prevLesson">Bài trước</button>
+                <button id="nextLesson" disabled>Bài tiếp theo</button>
+            </div>
+        </div>
+        <div class="main-content">
+            <h1 id="lessonTitle"></h1>
+            <p id="lessonDescription"></p>
+            <video id="lessonVideo" controls style="display: none;">
+                <source src="" type="video/mp4">
+                Video không tồn tại
+            </video>
+            <div id="lessonText" class="lessonText"></div>
+            <!-- Gợi ý khóa học -->
+            <div id="courseSuggestions" class="course-suggestions" style="display: none;">
+                <h2>Khóa học gợi ý</h2>
+                <div id="suggestionsList" class="courses"></div>
+            </div>
+           <!-- Chat box -->
+            <div id="chatContainer">
+                <div id="chatIcon" onclick="toggleChat()">
+                    <img src="/img/chat-icon.png" alt="Chat Icon" style="width: 100%; height: 100%;">
+                </div>
+                <div id="chatForm" style="display: none;">
+                    <div id="chatHeader">
+                        <h3>Group Chat</h3>
+                    </div>
+                    <div id="chatMessages">
+                        <!-- Messages will be displayed here -->
+                    </div>
+                    <div style="display: flex;">
+                        <input type="text" id="chatInput" placeholder="Type a message...">
+                        <button onclick="sendMessage()" id="btnsend">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="reviewPopup" class="review-popup">
+        <div id="yourReview">
+            <strong>Đánh giá:</strong>
+            <textarea id="yourComment" placeholder="Write your review..."></textarea>
+            <input type="number" id="yourRating" min="1" max="5" placeholder="Rating (1-5)">
+            <div class="review-buttons">
+                <button class="btn" id="submitReviewBtn">Đăng</button>
+                <button class="btn" id="editReviewBtn" style="display:none;">Sửa</button>
+                <button class="btn" id="deleteReviewBtn" style="display:none;">Xóa</button>
+            </div>
+            <div id="userSubmittedReview" style="display:none;">
+                <p><strong>Đánh giá của bạn:</strong></p>
+                <p><strong>Bình luận:</strong> <span id="userCommentDisplay"></span></p>
+                <p><strong>Điểm:</strong> <span id="userRatingDisplay"></span>/5</p>
+            </div>
+        </div>
+    
+        <div id="otherReviews">
+            <strong>Danh sách đánh giá:</strong>
+        </div>
+    </div>
+    
+<!-- ghi chú -->
+<div id="notePopup" class="modal">
+    <div class="modal-content">
+        <h3>Ghi chú của bạn</h3>
+        <textarea id="noteInput" rows="4" placeholder="Write your note here..."></textarea>
+        <button id="saveNoteButton">Save Note</button>
+        <div id="userSubmittedNote" style="display:none;">
+            <p><strong>Bạn vừa ghi chú:</strong></p>
+            <p id="userNoteDisplay"></p>
+        </div>
+    </div>
+</div>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    const userId = "<%= user ? user.IDNguoiDung : '' %>";
+    const courseId = "<%= courseId %>";
+    const username = "<%= user ? user.HoTenNguoiDung : '' %>";
+</script>
+<script>
+    // Initialize socket.io
+    const socket = io('http://localhost:3000');
+
+    window.toggleChat = function() {
+        const chatForm = document.getElementById('chatForm');
+        chatForm.style.display = chatForm.style.display === 'none' ? 'block' : 'none';
+
+        if (chatForm.style.display === 'block') {
+            socket.emit('join', { userId, courseId, username });
+        }
+    };
+
+    window.sendMessage = function() {
+        const chatInput = document.getElementById('chatInput');
+        if (chatInput.value.trim()) {
+            socket.emit('chat message', { userId, courseId, msg: chatInput.value });
+            chatInput.value = '';
+        }
+    };
+
+    window.scrollToBottom = function() {
+        const chatMessages = document.getElementById('chatMessages');
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    };
+
+    // Chat logic
+    socket.on('chat message', (data) => {
+        const chatMessages = document.getElementById('chatMessages');
+        const message = document.createElement('p');
+        message.textContent = `${data.username}: ${data.msg}`;
+        chatMessages.appendChild(message);
+        scrollToBottom();
+    });
+
+    socket.on('user connected', (msg) => {
+        const chatMessages = document.getElementById('chatMessages');
+        const message = document.createElement('p');
+        message.textContent = msg;
+        chatMessages.appendChild(message);
+        scrollToBottom();
+    });
+
+    socket.on('user disconnected', (msg) => {
+        const chatMessages = document.getElementById('chatMessages');
+        const message = document.createElement('p');
+        message.textContent = msg;
+        chatMessages.appendChild(message);
+        scrollToBottom();
+    });
+
+    // Handle Enter key press for sending messages
+    document.getElementById('chatInput').addEventListener('keypress', (event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            sendMessage();
+        }
+    });
+</script>
+    <script>
+    
+        document.addEventListener('DOMContentLoaded', () => {
+            const courseId = <%= courseId %>; // Pass the actual courseId from the backend
+            const lessons = <%- JSON.stringify(lessons) %>;
+            let currentLessonId = <%- JSON.stringify(currentLessonId) %>;
+            let currentLessonIndex = lessons.findIndex(lesson => lesson.IDBaiHoc === currentLessonId);
+            let lessonCompletionTriggered = false;
+            // cập nhật tiến trình
+            function updateProgress(courseId, lessonId) {
+                fetch('/update-progress', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ courseId, lessonId }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const lessonLink = document.querySelector(`a[data-lesson-id="${lessonId}"]`);
+                    if (data.status === 'hoàn thành') {
+                        lessonLink.classList.add('completed');
+                        lessonLink.classList.remove('disabled', 'in-progress');
+                        document.getElementById('nextLesson').disabled = false;
+                        checkLastLessonCompletion(); // Thêm dòng này
+                    } else if (data.status === 'đang học') {
+                        lessonLink.classList.add('in-progress');
+                        lessonLink.classList.remove('disabled');
+                    }
+                })
+                .catch(error => console.error('Error updating progress:', error));
+            }
+
+            function fetchCourseSuggestions(courseId) {
+                fetch(`/course-suggestions/${courseId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.length > 0) {
+                            const suggestionsList = document.getElementById('suggestionsList');
+                            suggestionsList.innerHTML = '';
+
+                            data.forEach(course => {
+                                const div = document.createElement('div');
+                                div.classList.add('course');
+
+                                const img = document.createElement('img');
+                                img.src = course.AnhKhoaHoc;  // Đường dẫn ảnh của khóa học
+                                img.alt = course.TenKhoaHoc;
+
+                                const courseInfo = document.createElement('div');
+                                courseInfo.classList.add('course-info');
+
+                                const h3 = document.createElement('h3');
+                                const a = document.createElement('a');
+                                a.href = `/courseInfo/${course.IDKhoaHoc}`;
+                                a.textContent = course.TenKhoaHoc;
+                                h3.appendChild(a);
+
+                                courseInfo.appendChild(h3);
+                                div.appendChild(img);
+                                div.appendChild(courseInfo);
+                                suggestionsList.appendChild(div);
+                            });
+
+                            document.getElementById('courseSuggestions').style.display = 'block';
+                        }
+                    })
+                    .catch(error => console.error('Error fetching course suggestions:', error));
+                    }
+
+            function checkLastLessonCompletion() {
+                if (currentLessonIndex === lessons.length - 1) {
+                    alert('Chúc mừng! Bạn đã hoàn thành khóa học.');
+                    fetchCourseSuggestions(courseId);
+                }
+            }
+
+            function completeLesson(courseId, lessonId) {
+                fetch('/complete-lesson', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ courseId, lessonId }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    updateProgress(courseId, lessonId);
+                })
+                .catch(error => console.error('Error completing lesson:', error));
+            }
+
+            function loadLesson(index) {
+                lessonCompletionTriggered = false; // Reset the flag for the new lesson
+                currentLessonIndex = index; // Update the current lesson index
+                currentLessonId = lessons[index].IDBaiHoc;
+                const lesson = lessons[index];
+                document.getElementById('lessonTitle').style.display = 'none';
+                document.getElementById('lessonDescription').style.display = 'none';
+
+                const videoElement = document.getElementById('lessonVideo');
+                const lessonTextElement = document.getElementById('lessonText');
+
+                videoElement.style.display = 'none';
+                lessonTextElement.style.display = 'none';
+
+                if (lesson.LoaiBaiHoc === 'video') {
+                    const videoSource = videoElement.querySelector('source');
+                    videoSource.setAttribute('src', '/course/lesson/' + lesson.FileBaiHoc);
+                    videoElement.style.display = 'block';
+                    videoElement.load();
+                    videoElement.play();
+
+                    let progressSaved = false;
+
+                    videoElement.ontimeupdate = function () {
+                        if (videoElement.currentTime >= videoElement.duration * 0.80 && !progressSaved) {
+                            completeLesson(courseId, lesson.IDBaiHoc);
+                            progressSaved = true;
+                        }
+                    };
+
+                    videoElement.onended = function () {
+                        if (!lessonCompletionTriggered) {
+                            completeLesson(courseId, lesson.IDBaiHoc);
+                        }
+                    };
+
+                    updateProgress(courseId, lesson.IDBaiHoc);
+                } else if (lesson.LoaiBaiHoc === 'text') {
+                    document.getElementById('lessonTitle').style.display = 'none';
+                    document.getElementById('lessonDescription').style.display = 'none';
+                    lessonTextElement.innerHTML = lesson.FileBaiHoc;
+                    lessonTextElement.style.display = 'block';
+
+                    lessonTextElement.scrollTop = 0; // Reset scroll position to the top
+
+                    // Check if the content fits within the container without scrolling
+                    if (lessonTextElement.scrollHeight <= lessonTextElement.clientHeight) {
+                        completeLesson(courseId, lesson.IDBaiHoc);
+                        lessonCompletionTriggered = true;
+                        document.getElementById('nextLesson').disabled = false;
+                    } else {
+                        updateProgress(courseId, lesson.IDBaiHoc);
+                        lessonTextElement.onscroll = function () {
+                            if (this.scrollHeight - this.scrollTop <= this.clientHeight + 10 && !lessonCompletionTriggered) {
+                                completeLesson(courseId, lesson.IDBaiHoc);
+                                lessonCompletionTriggered = true;
+                                document.getElementById('nextLesson').disabled = false;
+                            }
+                        };
+                    }
+                } else {
+                    console.error('Unknown lesson type:', lesson.LoaiBaiHoc);
+                }
+
+                document.querySelector('.sidebar ul li.active').classList.remove('active');
+               
+                document.querySelector(`.sidebar ul li:nth-child(${index + 1})`).classList.add('active');
+
+                const lessonLink = document.querySelector(`a[data-lesson-id="${lesson.IDBaiHoc}"]`);
+                if (lesson.Completed || lesson.InProgress) {
+                    document.getElementById('nextLesson').disabled = false;
+                    lessonLink.classList.add('completed');
+                    lessonLink.classList.remove('disabled');
+                } else {
+                    document.getElementById('nextLesson').disabled = true;
+                    lessonLink.classList.add('disabled');
+                    lessonLink.classList.remove('completed', 'in-progress');
+                }
+            }
+
+            document.querySelectorAll('.sidebar ul li a').forEach((link, index) => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    if (!link.classList.contains('disabled')) {
+                        loadLesson(index);
+                    }
+                });
+            });
+
+            document.getElementById('prevLesson').addEventListener('click', () => {
+                if (currentLessonIndex > 0) {
+                    loadLesson(currentLessonIndex - 1);
+                }
+            });
+
+            document.getElementById('nextLesson').addEventListener('click', () => {
+                if (currentLessonIndex < lessons.length - 1) {
+                    loadLesson(currentLessonIndex + 1);
+                }
+            });
+
+            loadLesson(currentLessonIndex);
+
+
+
+        // JavaScript to toggle the sidebar
+        document.querySelector('.sidebar-toggle').addEventListener('click', () => {
+            document.querySelector('.sidebar').classList.toggle('collapsed');
+        });
+
+        // Ghi chú khóa học
+            const notePopup = document.getElementById('notePopup');
+            const noteCourseBtn = document.getElementById('noteCourseBtn');
+            const saveNoteButton = document.getElementById('saveNoteButton');
+            const noteInput = document.getElementById('noteInput');
+            const userSubmittedNote = document.getElementById('userSubmittedNote');
+            const userNoteDisplay = document.getElementById('userNoteDisplay');
+            let previousContent = '';  // To store the last saved note
+            function toggleNotePopup() {
+                notePopup.style.display = notePopup.style.display === 'block' ? 'none' : 'block';
+            }
+
+            async function loadUserNote() {
+                try {
+                    const response = await fetch(`/notes/${courseId}/user`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                    });
+                    const data = await response.json();
+                    if (data.yourNote) {
+                        previousContent = data.yourNote.NoiDung;  // Initialize previousContent
+                        noteInput.value = previousContent;  // Set the textarea value to the existing note
+                        userSubmittedNote.style.display = 'block';
+                        userNoteDisplay.textContent = '';  // Start with an empty display
+                    } else {
+                        userSubmittedNote.style.display = 'none';
+                        noteInput.value = '';
+                    }
+                } catch (error) {
+                    console.error('Error loading user note:', error);
+                }
+            }
+
+            async function saveNote() {
+                const noteContent = noteInput.value.trim();
+                if (!noteContent) {
+                    alert('Không được để trống.');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/notes/${courseId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ NoiDung: noteContent }),
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        // Display new content only
+                        let newContent = '';
+                        if (noteContent.length > previousContent.length) {
+                            newContent = noteContent.substring(previousContent.length); // New additions
+                        } else {
+                            // Handle cases where the new content is shorter (i.e., deletion)
+                            // In this case, we need to compare what was new and what was deleted.
+                            newContent = noteContent;
+                        }
+
+                        // Display the new content if it exists
+                        if (newContent.length > 0) {
+                            userNoteDisplay.textContent = newContent;  // Display only new content
+                            userSubmittedNote.style.display = 'block';
+                        } else {
+                            userSubmittedNote.style.display = 'none';
+                        }
+                        
+                        previousContent = noteContent;  // Update previousContent
+                    }
+                } catch (error) {
+                    console.error('Error saving note:', error);
+                }
+            }
+
+            if (noteCourseBtn) {
+                noteCourseBtn.addEventListener('click', toggleNotePopup);
+            }
+
+            if (saveNoteButton) {
+                saveNoteButton.addEventListener('click', saveNote);
+            }
+
+            loadUserNote();
+
+            // Close note popup when clicking outside of it
+            document.addEventListener('click', (event) => {
+                if (notePopup && !notePopup.contains(event.target) && event.target !== noteCourseBtn) {
+                    notePopup.style.display = 'none';
+                }
+            });
+
+        // Đánh giá khóa học
+        const reviewPopup = document.getElementById('reviewPopup');
+        const rateCourseBtn = document.getElementById('rateCourseBtn');
+        const submitReviewBtn = document.getElementById('submitReviewBtn');
+        const yourReviewTextarea = document.getElementById('yourComment');
+        const yourRatingInput = document.getElementById('yourRating');
+        const userSubmittedReview = document.getElementById('userSubmittedReview');
+        const userCommentDisplay = document.getElementById('userCommentDisplay');
+        const userRatingDisplay = document.getElementById('userRatingDisplay');
+        const editReviewBtn = document.getElementById('editReviewBtn');
+        const deleteReviewBtn = document.getElementById('deleteReviewBtn');
+        const otherReviewsDiv = document.getElementById('otherReviews');
+        function validateReview(comment, rating) {
+        if (!comment.trim()) {
+            alert('Không được để trống.');
+            return false;
+        }
+        if (!Number.isInteger(Number(rating)) || rating < 1 || rating > 5) {
+            alert('Chỉ được cho điểm trong khoảng 1-5');
+            return false;
+        }
+        return true;
+        }
+
+        function toggleReviewPopup() {
+            reviewPopup.style.display = reviewPopup.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function loadUserReview() {
+            fetch(`/reviews/${courseId}/user`,
+            {method: 'GET',
+            headers: {
+                    'Content-Type': 'application/json',
+                },
+        })
+                .then(response => response.json())
+                .then(data => {
+                if (data.yourReview) {
+                    console.log('User review found');
+                    userCommentDisplay.textContent = data.yourReview.BinhLuan;
+                    userRatingDisplay.textContent = data.yourReview.DiemDanhGia;
+                    userSubmittedReview.style.display = 'block';
+                    yourReviewTextarea.value = data.yourReview.BinhLuan; // Update this line
+                    yourRatingInput.value = data.yourReview.DiemDanhGia; // Update this line
+                    submitReviewBtn.style.display = 'none';
+                    editReviewBtn.style.display = 'inline-block';
+                    deleteReviewBtn.style.display = 'inline-block';
+                } else {
+                    userSubmittedReview.style.display = 'none';
+                    yourReviewTextarea.value = ''; // Clear the textarea
+                    yourRatingInput.value = ''; // Clear the rating input
+                    submitReviewBtn.style.display = 'inline-block';
+                    editReviewBtn.style.display = 'none';
+                    deleteReviewBtn.style.display = 'none';
+                }
+            })
+                .catch(error => console.error('Error loading user review:', error));
+        }
+
+        function loadOtherReviews() {
+                console.log('Loading reviews for course ID:', courseId);  // Added logging to check courseId
+                fetch(`/reviews/${courseId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        otherReviewsDiv.innerHTML = '<strong>Other Reviews:</strong>';
+                        if (data.length > 0) {
+                            data.forEach(review => {
+                                const reviewElement = document.createElement('div');
+                                reviewElement.className = 'review';
+                                reviewElement.innerHTML = `
+                                    <img src="${review.AnhDaiDien}" alt="${review.HoTenNguoiDung}" class="review-avatar">
+                                    <strong>${review.HoTenNguoiDung}:</strong>
+                                    <p>${review.BinhLuan}</p>
+                                    <span>Rating: ${review.DiemDanhGia}/5</span>
+                                `;
+                                otherReviewsDiv.appendChild(reviewElement);
+                            });
+                        } else {
+                            otherReviewsDiv.innerHTML += '<p>No reviews available.</p>';
+                        }
+                    })
+                    .catch(error => console.error('Error loading other reviews:', error));
+            }
+
+
+        function submitReview(comment, rating) {
+            if (!validateReview(comment, rating)) return;
+            fetch(`/reviews`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ IDKhoaHoc: courseId, BinhLuan: comment, DiemDanhGia: rating }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadUserReview();
+                    loadOtherReviews();
+                }
+            })
+            .catch(error => console.error('Error submitting review:', error));
+        }
+
+        function editReview(comment, rating) {
+            if (!validateReview(comment, rating)) return;
+            fetch(`/reviews/${courseId}/edit`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ BinhLuan: comment, DiemDanhGia: rating }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadUserReview();
+                    loadOtherReviews();
+                }
+            })
+            .catch(error => console.error('Error editing review:', error));
+        }
+
+        function deleteReview() {
+            fetch(`/reviews/${courseId}/delete`, {
+                method: 'DELETE',
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadUserReview();
+                    loadOtherReviews();
+                }
+            })
+            .catch(error => console.error('Error deleting review:', error));
+        }
+
+        rateCourseBtn.addEventListener('click', toggleReviewPopup);
+        submitReviewBtn.addEventListener('click', () => {
+            const comment = yourReviewTextarea.value;
+            const rating = yourRatingInput.value;
+            submitReview(comment, rating);
+        });
+        editReviewBtn.addEventListener('click', () => {
+            const comment = yourReviewTextarea.value;
+            const rating = yourRatingInput.value;
+            editReview(comment, rating);
+        });
+        deleteReviewBtn.addEventListener('click', deleteReview);
+
+        loadUserReview();
+        loadOtherReviews();
+
+        // Close review popup when clicking outside of it
+        document.addEventListener('click', (event) => {
+            if (!reviewPopup.contains(event.target) && event.target !== rateCourseBtn) {
+                reviewPopup.style.display = 'none';
+            }
+        });
+    });
+    </script>
+</body>
+
+</html>

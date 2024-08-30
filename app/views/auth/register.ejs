@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S.HELP</title>
+    <link rel="stylesheet" href="css/auth.css">
+    <link rel="icon" href="/img/logo.png" sizes="16x16" type="image/png">
+
+    <script>
+        function validateForm() {
+            let name = document.forms["registerForm"]["name"].value;
+            let email = document.forms["registerForm"]["email"].value;
+            let password = document.forms["registerForm"]["password"].value;
+            let confirmpassword = document.forms["registerForm"]["confirmpassword"].value;
+            let errors = [];
+
+            // Kiểm tra định dạng email
+            let emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+            if (!emailPattern.test(email)) {
+                errors.push("Email is not valid.");
+            }
+
+            // Kiểm tra độ dài mật khẩu
+            if (password.length < 6) {
+                errors.push("Password must be at least 6 characters long.");
+            }
+
+            // Kiểm tra sự khớp của mật khẩu
+            if (password !== confirmpassword) {
+                errors.push("Passwords do not match.");
+            }
+
+            // Hiển thị thông báo lỗi nếu có
+            let errorDiv = document.getElementById("errorMessages");
+            if (errors.length > 0) {
+                errorDiv.innerHTML = "<ul><li>" + errors.join("</li><li>") + "</li></ul>";
+                errorDiv.style.display = "block"; // Hiển thị phần tử
+                return false;
+            }
+            errorDiv.innerHTML = "";
+            errorDiv.style.display = "none"; // Ẩn phần tử
+            return true;
+        }
+    </script>
+</head>
+<body>
+    <header>
+        <div class="header-left" onclick="window.location.href='/home'">
+            <img src="/img/logo.png" alt="Logo" class="logo">
+            <h1>U.COURSE</h1>
+        </div>
+        <div class="header-right">
+            <button class="btn" onclick="window.location.href='/register'">Đăng kí</button>
+            <button class="btn logout" onclick="window.location.href='/login'">Đăng nhập</button>
+        </div>
+    </header>
+    <main>
+        <div class="container">
+            <div class="left-section">
+                <h1>Start your learning with <span class="brand">U.COURSE</span></h1>
+            </div>
+            <div class="right-section">
+                <h1 class="or">ĐĂNG KÍ</h1>
+                <form name="registerForm" action="/register" method="POST" onsubmit="return validateForm()">
+                    <input type="text" name="name" placeholder="Họ và Tên" value="<%= typeof name !== 'undefined' ? name : '' %>" required>
+                    <input type="email" name="email" placeholder="Email" value="<%= typeof email !== 'undefined' ? email : '' %>" required>
+                    <input type="password" name="password" placeholder="Mật khẩu" value="<%= typeof password !== 'undefined' ? password : '' %>" required>
+                    <input type="password" name="confirmpassword" placeholder="Nhập lại mật khẩu" value="<%= typeof confirmpassword !== 'undefined' ? confirmpassword : '' %>" required>
+                    <div id="errorMessages" class="error-message" style="display: none;"></div> <!-- Ẩn mặc định -->
+                    <% if (typeof conflictError != "undefined" && conflictError) { %>
+                        <div class="text-danger text-left  mb-3"><%= conflictError %></div>
+                    <% } %>
+                    <button type="submit">Đăng kí</button>
+                </form>
+                <div class="login-link">Bạn đã có tài khoản ? <a href="/login">Đăng nhập</a></div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

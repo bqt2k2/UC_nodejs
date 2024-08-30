@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng Tải Bài Học</title>
+    <link rel="stylesheet" href="/css/course.css">
+    <script src="https://cdn.tiny.cloud/1/uhyv5dzy5xq88uxr7e6sjtd2jp1gd7gped3bhvunk5vwl2q9/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
+    <link rel="icon" href="/img/logo.png" sizes="16x16" type="image/png">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+       // Function to toggle display based on lesson type selection
+       function toggleLessonType() {
+            var lessonType = document.getElementById('lessonType').value;
+            document.getElementById('videoUpload').style.display = lessonType === 'video' ? 'block' : 'none';
+            document.getElementById('textUpload').style.display = lessonType === 'text' ? 'block' : 'none';
+        }
+
+        // Initialize display based on current selection
+        document.addEventListener('DOMContentLoaded', function () {
+            toggleLessonType(); // Ensure correct initial display
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            tinymce.init({
+                selector: '#editLesson',
+                plugins: 'advlist autolink link image lists charmap print preview hr anchor pagebreak',
+                toolbar_mode: 'floating',
+                toolbar: 'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help | preview | importword',
+                height: 300,
+                menubar: 'file edit view insert format tools table help',
+                setup: function(editor) {
+                    editor.ui.registry.addButton('importword', {
+                        text: 'Import from Word',
+                        onAction: function() {
+                            document.getElementById('wordUpload').click();
+                        }
+                    });
+                }
+            });
+
+            document.getElementById('wordUpload').addEventListener('change', function(event) {
+                var file = event.target.files[0];
+                if (file && file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+                    var reader = new FileReader();
+                    reader.onload = function(event) {
+                        var arrayBuffer = event.target.result;
+                        mammoth.convertToHtml({ arrayBuffer: arrayBuffer })
+                            .then(function(result) {
+                                var html = result.value;
+                                tinymce.get('editLesson').setContent(html);
+                            })
+                            .catch(function(err) {
+                                console.error('Error converting file:', err);
+                                alert('An error occurred while processing the file.');
+                            });
+                    };
+                    reader.readAsArrayBuffer(file);
+                } else {
+                    alert('Please upload a valid Word document (.docx)');
+                }
+            });
+        });
+    </script>
+</head>
+<body onload="toggleLessonType()">
+    <header>
+        <div class="header-left" onclick="window.location.href='/home'">
+            <img src="/img/logo.png" alt="" class="logo">
+            <h1>U.COURSE</h1>
+        </div>
+        <div id="search-results"></div>
+        <div class="header-right">
+            <button class="btn" onclick="window.location.href='/profile'">Thông tin</button>
+            <div class="user-info">
+                <span class="logo-text">Hi! <%= user.HoTenNguoiDung %> </span>
+                <form action="/logout" method="post" style="display: inline;">
+                    <button class="btn logout" type="submit">Đăng xuất</button>
+                </form>
+            </div>
+        </div>
+    </header>
+    <div class="container">
+        <h1>Đăng Tải Bài Học</h1>
+        <form action="/lessons/upload" method="POST" enctype="multipart/form-data">
+            <input type="hidden" id="courseId" name="courseId" value="<%= IDKhoaHoc %>">
+            <label for="lessonName">Tên Bài Học</label>
+            <input type="text" id="lessonName" name="lessonName" required>
+        
+            <label for="lessonDescription">Mô Tả Bài Học</label>
+            <textarea id="lessonDescription" name="lessonDescription" rows="4" ></textarea>
+        
+            <label for="lessonType">Loại Bài Học</label>
+            <select id="lessonType" name="lessonType" onchange="toggleLessonType()" required>
+                <option value="video">Video</option>
+                <option value="text">Văn Bản</option>
+            </select>
+        
+            <div id="videoUpload" style="display: none;">
+                <label for="lessonVideo">File Video</label>
+                <input type="file" id="lessonVideo" name="lessonFile" accept="video/*">
+            </div>
+        
+            <div id="textUpload" style="display: none;">
+                <label for="lessonText">Nội Dung Văn Bản</label>
+                <textarea id="editLesson" name="editLesson" rows="4"></textarea>
+                <input type="file" id="wordUpload" accept=".docx" style="display: none;">
+            </div>
+        
+            <label for="lessonOrder">Thứ Tự Bài Học</label>
+            <input type="number" id="lessonOrder" name="lessonOrder" required>
+        
+            <button type="submit">Đăng Tải Bài Học</button>
+        </form>
+        
+        <h2>Danh Sách Bài Học</h2>
+        <table class="lesson-table">
+            <thead>
+                <tr>
+                    <th>Tên Bài Học</th>
+                    <th>Loại Bài Học</th>
+                    <th>Thứ tự bài học</th>
+                    <th>Hành Động</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (lessons.length > 0) { %>
+                    <% lessons.forEach(function(item) { %>
+                        <tr id="lesson-<%= item.IDBaiHoc %>">
+                            <td><%= item.TenBaiHoc %></td>
+                            <td><%= item.LoaiBaiHoc %></td>
+                            <td><%= item.ThuTuBaiHoc %></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button type="button" class="btn btn-delete" onclick="deleteLesson('<%= item.IDBaiHoc %>', '<%= IDKhoaHoc %>')">Xóa</button>
+                                    <button type="button" class="btn btn-edit" onclick="window.location.href='/lessons/<%= item.IDBaiHoc %>/edit'">Sửa</button>
+                                </div>
+                            </td>                                
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="4">Không có bài học nào.</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+        
+    </div>
+</body>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+function deleteLesson(lessonId, courseId) {
+    Swal.fire({
+        title: 'Bạn có chắc chắn?',
+        text: 'Bạn có chắc chắn muốn xóa bài học này không?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Có, xóa nó!',
+        cancelButtonText: 'Hủy'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: '/lessons/' + lessonId,
+                type: 'DELETE',
+                data: { courseId: courseId },
+                success: function(response) {
+                    $('#lesson-' + lessonId).remove();
+                    Swal.fire(
+                        'Đã xóa!',
+                        response.message,
+                        'success'
+                    );
+                },
+                error: function(xhr) {
+                    Swal.fire(
+                        'Thất bại!',
+                        'Không thể xóa bài học. Vui lòng thử lại.',
+                        'error'
+                    );
+                }
+            });
+        }
+    });
+}
+
+</script>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Password</title>
+    <link rel="stylesheet" href="/css/auth.css">
+    <link rel="icon" href="/img/logo.png" sizes="16x16" type="image/png">
+
+    <script>
+        function validateForm() {
+            let password = document.forms["resetForm"]["password"].value;
+            let confirmpassword = document.forms["resetForm"]["confirmpassword"].value;
+            let errors = [];
+
+            // Kiểm tra độ dài mật khẩu
+            if (password.length < 6) {
+                errors.push("Password must be at least 6 characters long.");
+            }
+
+            // Kiểm tra sự khớp của mật khẩu
+            if (password !== confirmpassword) {
+                errors.push("Passwords do not match.");
+            }
+
+            // Hiển thị thông báo lỗi nếu có
+            let errorDiv = document.getElementById("errorMessages");
+            if (errors.length > 0) {
+                errorDiv.innerHTML = "<ul><li>" + errors.join("</li><li>") + "</li></ul>";
+                errorDiv.style.display = "block"; // Hiển thị phần tử
+                return false;
+            }
+            errorDiv.innerHTML = "";
+            errorDiv.style.display = "none"; // Ẩn phần tử
+            return true;
+        }
+    </script>
+</head>
+<body>
+    <header>
+        <div class="header-left" onclick="window.location.href='/home'">
+            <img src="/img/logo.png" alt="Logo" class="logo">
+            <h1>U.COURSE</h1>
+        </div>
+        <div class="header-right">
+            <button class="btn" onclick="window.location.href='/profile'">Profile</button>
+            <div class="user-info">
+                <span class="logo-text">Hi! <%= user.HoTenNguoiDung %></span>
+                <button class="btn logout" onclick="window.location.href='/logout'">Logout</button>
+            </div>
+        </div>
+    </header>
+    <main>
+        <div class="left-section">
+            <h1>Start your learning with <span class="brand">U.COURSE</span></h1>
+        </div>
+        <div class="right-section">
+            <h1 class="or">Reset Password</h1>
+            <form name="resetForm" action="/password/reset" method="POST" onsubmit="return validateForm()">
+                <input type="hidden" name="token" value="<%= token %>">
+                <input type="password" name="password" placeholder="Password" required>
+                <input type="password" name="confirmpassword" placeholder="Confirm Password" required>
+                <div id="errorMessages" class="error-message" style="display: none;"></div> <!-- Ẩn mặc định -->
+                <% if (typeof conflictError !== 'undefined' && conflictError) { %>
+                    <div class="text-danger text-left mb-3"><%= conflictError %></div>
+                <% } %>
+                <button type="submit">Reset Password</button>
+            </form>
+            <div class="login-link">Already have an account? <a href="/login">Login</a></div>
+        </div>
+    </main>
+</body>
+</html>
