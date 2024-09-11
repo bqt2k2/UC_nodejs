@@ -7,13 +7,13 @@ A web-based platform designed for course sharing, allowing users to register, co
 ## 🚀 Features
 
 ### 🔹 User Features:
-- **Course Registration:** Users can browse and register for courses.
+- **Course Registration:** Users can post, add, edit, and delete courses and register for courses.
 - **Continue Learning:** Users can pick up where they left off.
 - **View Suggested Courses:** Personalized course recommendations.
 - **Gmail Authentication:** Secure user login via Gmail.
 
 ### 🔹 Admin Features:
-- **Course Management:** Admins can post, add, edit, and delete courses.
+- **Course Management:** Adminscan browse.
 - **Real-time Communication:** Chat functionality for users to interact.
 
 ---
@@ -42,7 +42,24 @@ A web-based platform designed for course sharing, allowing users to register, co
 - fs-extra (File system operations)
 
 ---
+## 🖼️ Screenshots
 
+### Login Page
+![Login](app/public/img/login.png)
+
+### Homepage
+![Homepage Screenshot](app/public/img/home.png)
+
+### Courses Management
+![Courses Screenshot](app/public/img/postCoures.png)
+
+### Lesson Management
+![Lesson Screenshot](app/public/img/postLesson.png)
+
+### Learning Page
+![Learning Screenshot](app/public/img/lerning.png)
+
+---
 ## 🛠 Installation and Setup
 
 ### Prerequisites
