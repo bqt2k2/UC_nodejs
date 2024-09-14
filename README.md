@@ -7,14 +7,19 @@ A web-based platform designed for course sharing, allowing users to register, co
 ## 🚀 Features
 
 ### 🔹 User Features:
-- **Course Registration:** Users can post, add, edit, and delete courses and register for courses.
-- **Continue Learning:** Users can pick up where they left off.
-- **View Suggested Courses:** Personalized course recommendations.
-- **Gmail Authentication:** Secure user login via Gmail.
+- **Course Access:** Users can visit the platform to search for and participate in courses they are interested in. They can also upload the courses they own.
+- **Guest Access:** Users can access the platform as guests without logging in, allowing them to search for and view detailed course information. To register for courses, upload, rate, or edit course information, they must log in.
+- **Course Registration:** Users can post, add, edit, and delete courses, as well as register for other courses.
+- **Continue Learning:** Users can continue courses from where they last left off.
+- **View Suggested Courses:** Personalized course recommendations based on users' preferences and learning activities.
+- **Gmail Authentication:** Secure login via Gmail to access advanced platform features.
 
 ### 🔹 Admin Features:
-- **Course Management:** Adminscan browse.
-- **Real-time Communication:** Chat functionality for users to interact.
+- **Course Management:** Admins can browse and manage all courses.
+- **User Management:** Admins can view and manage user information, including their learning history and courses they’ve participated in.
+- **Statistics and Reports:** Admins can view platform activity statistics, such as the number of courses posted, courses completed, user numbers, and generate detailed reports.
+- **Real-time Communication:** A chat functionality for users to discuss courses or receive technical support.
+
 
 ---
 
