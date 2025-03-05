@@ -135,7 +135,9 @@
 </script>
 <script>
     // Initialize socket.io
-    const socket = io('http://localhost:3000');
+    const socket = io('https://uc-nodejs.onrender.com', {
+        transports: ['websocket'],
+    });
 
     window.toggleChat = function() {
         const chatForm = document.getElementById('chatForm');
