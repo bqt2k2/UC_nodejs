@@ -320,31 +320,6 @@ Course.getCourses = (limit, offset, result) => {
 // truy lượt đăng kí của khóa học trong 1 tuần
 Course.getMostRegisteredThisWeek = async (result) => {
     const query = `
--- Subquery to calculate the total number of registrations for each course in the current week
-WITH RegistrationCounts AS (
-    SELECT 
-        dk.IDKhoaHoc,
-        COUNT(dk.IDNguoiDung) AS TongLuotDangKy
-    FROM 
-        dangkykhoahoc dk
-    WHERE 
-        YEARWEEK(dk.ThoiGianDangKy, 1) = YEARWEEK(CURDATE(), 1)
-    GROUP BY 
-        dk.IDKhoaHoc
-),
--- Subquery to calculate the average rating and count of ratings for each course
-RatingStats AS (
-    SELECT 
-        k.IDKhoaHoc,
-        ROUND(AVG(dg.DiemDanhGia), 1) AS TrungBinhDiemDanhGia,
-        COUNT(DISTINCT dg.IDDanhGiaKhoaHoc) AS SoLuotDanhGia
-    FROM 
-        khoahoc k
-    LEFT JOIN 
-        danhgiakhoahoc dg ON k.IDKhoaHoc = dg.IDKhoaHoc
-    GROUP BY 
-        k.IDKhoaHoc
-)
 SELECT 
     k.IDKhoaHoc, 
     k.TenKhoaHoc, 
@@ -356,10 +331,29 @@ SELECT
     COALESCE(rs.SoLuotDanhGia, 0) AS SoLuotDanhGia
 FROM 
     khoahoc k
-JOIN 
-    RegistrationCounts rc ON k.IDKhoaHoc = rc.IDKhoaHoc
 LEFT JOIN 
-    RatingStats rs ON k.IDKhoaHoc = rs.IDKhoaHoc
+    (SELECT 
+        dk.IDKhoaHoc,
+        COUNT(dk.IDNguoiDung) AS TongLuotDangKy
+     FROM 
+        dangkykhoahoc dk
+     WHERE 
+        YEARWEEK(dk.ThoiGianDangKy, 1) = YEARWEEK(CURDATE(), 1)
+     GROUP BY 
+        dk.IDKhoaHoc
+    ) AS rc ON k.IDKhoaHoc = rc.IDKhoaHoc
+LEFT JOIN 
+    (SELECT 
+        k.IDKhoaHoc,
+        ROUND(AVG(dg.DiemDanhGia), 1) AS TrungBinhDiemDanhGia,
+        COUNT(DISTINCT dg.IDDanhGiaKhoaHoc) AS SoLuotDanhGia
+     FROM 
+        khoahoc k
+     LEFT JOIN 
+        danhgiakhoahoc dg ON k.IDKhoaHoc = dg.IDKhoaHoc
+     GROUP BY 
+        k.IDKhoaHoc
+    ) AS rs ON k.IDKhoaHoc = rs.IDKhoaHoc
 ORDER BY 
     rc.TongLuotDangKy DESC
 LIMIT 10;
@@ -390,31 +384,26 @@ Course.getTotalCourses = (result) => {
 // khóa học dc đăng kí nhiều nhất
 Course.getMostRegistered = async (result) => {
     const query = `
--- Step 1: Subquery to count registrations per course
-WITH RegistrationCounts AS (
-    SELECT 
-        dk.IDKhoaHoc,
-        COUNT(dk.IDNguoiDung) AS TongLuotDangKy
-    FROM 
-        dangkykhoahoc dk
-    GROUP BY 
-        dk.IDKhoaHoc
-)
-
--- Step 2: Main query to join with course and rating tables
 SELECT 
     k.IDKhoaHoc, 
     k.TenKhoaHoc, 
     k.MoTaKhoaHoc, 
     k.AnhKhoaHoc, 
     k.TrangThaiKhoaHoc, 
-    rc.TongLuotDangKy,
-    ROUND(AVG(dg.DiemDanhGia), 1) AS TrungBinhDiemDanhGia,
-    COUNT(DISTINCT dg.IDDanhGiaKhoaHoc) AS SoLuotDanhGia
+    COALESCE(rc.TongLuotDangKy, 0) AS TongLuotDangKy,
+    COALESCE(ROUND(AVG(dg.DiemDanhGia), 1), 0) AS TrungBinhDiemDanhGia,
+    COALESCE(COUNT(DISTINCT dg.IDDanhGiaKhoaHoc), 0) AS SoLuotDanhGia
 FROM 
     khoahoc k
-JOIN 
-    RegistrationCounts rc ON k.IDKhoaHoc = rc.IDKhoaHoc
+LEFT JOIN 
+    (SELECT 
+        dk.IDKhoaHoc,
+        COUNT(dk.IDNguoiDung) AS TongLuotDangKy
+     FROM 
+        dangkykhoahoc dk
+     GROUP BY 
+        dk.IDKhoaHoc
+    ) AS rc ON k.IDKhoaHoc = rc.IDKhoaHoc
 LEFT JOIN 
     danhgiakhoahoc dg ON k.IDKhoaHoc = dg.IDKhoaHoc
 GROUP BY 
