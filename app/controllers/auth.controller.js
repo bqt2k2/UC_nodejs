@@ -1,6 +1,6 @@
 const User = require('../models/auth.model');
 const Course = require('../models/course.model');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const mailer = require('../utils/mailer');
 const fs = require('fs');
 const path = require('path');
