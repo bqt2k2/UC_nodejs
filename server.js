@@ -80,6 +80,9 @@ io.on('connection', (socket) => {
 });
 
 require('./app/routes/route')(app);
+app.get("/", (req, res) => {
+    res.render("home");
+});
 
 http.listen(3000, function() {
     console.log('Server running: http://localhost:3000');
